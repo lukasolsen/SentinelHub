@@ -21,13 +21,15 @@ type FeodotrackerAbuseCHResp = {
 //feodotracker abuse ch
 
 export class FeodotrackerAbuseCH {
-  url: string;
+  urls: string[];
   data: FeodotrackerAbuseCHResp[];
   static instance: FeodotrackerAbuseCH;
 
   constructor() {
-    this.url =
-      "https://feodotracker.abuse.ch/downloads/ipblocklist_recommended.json";
+    this.urls = [
+      "https://feodotracker.abuse.ch/downloads/ipblocklist_recommended.json",
+      "https://feodotracker.abuse.ch/downloads/ipblocklist.json",
+    ];
     this.data = [];
   }
 
@@ -40,8 +42,9 @@ export class FeodotrackerAbuseCH {
 
   async getData(): Promise<FeodotrackerAbuseCHResp[]> {
     if (this.data.length === 0) {
-      const data = await getData(this.url);
-      this.data = data;
+      const dataPromises = this.urls.map((url) => getData(url));
+      const dataArray = await Promise.all(dataPromises);
+      this.data = dataArray.reduce((acc, data) => acc.concat(data), []);
       console.log("feodotracker abuse ch data fetched");
     } else {
       console.log("feodotracker abuse ch data already fetched");
@@ -51,6 +54,7 @@ export class FeodotrackerAbuseCH {
 
   async getIPs() {
     const data = await this.getData();
+    console.log(data);
     return data.map((item: FeodotrackerAbuseCHResp) => item.ip_address);
   }
 

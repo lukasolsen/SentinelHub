@@ -2,7 +2,7 @@ import axios from "axios";
 import { getIPAddress } from "./util-service";
 
 export const sendEmailContent = async (emailContent: string): any => {
-  const api = "http://localhost:1200/email-parser";
+  const api = "http://localhost:1200/api/parse-email";
 
   const ip_address = await getIPAddress();
   // we need to have Access-Control-Allow-Origin in header
@@ -28,7 +28,7 @@ export const sendEmailContent = async (emailContent: string): any => {
 };
 
 export const addEmailContent = async (emailContent: string): any => {
-  const api = "http://localhost:1200/email-add";
+  const api = "http://localhost:1200/api/add-bad-email";
 
   const ip_address = await getIPAddress();
 
@@ -54,16 +54,32 @@ export const addEmailContent = async (emailContent: string): any => {
 };
 
 export const getEmails = async (): any => {
-  const api = "http://localhost:1200/get-emails";
+  const api = "http://localhost:1200/api/bad-emails";
+
+  const ip_address = await getIPAddress();
+
+  return axios
+    .post(api)
+    .then((response) => {
+      console.log(response.data);
+      return response.data;
+    })
+    .catch((error) => {
+      return error;
+    });
+};
+
+export const getEmail = async (id: string): any => {
+  const api = `http://localhost:1200/api/bad-email/${id}`;
 
   const ip_address = await getIPAddress();
 
   return axios
     .get(api)
     .then((response) => {
-      return response;
+      return response.data;
     })
     .catch((error) => {
       return error;
     });
-};
+}
