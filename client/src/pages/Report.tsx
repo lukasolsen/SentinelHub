@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import DetectionWheel from "../components/DetectionWheel";
 import { useParams } from "react-router-dom";
 import { getEmail } from "../service/api-service";
-import { FaCheck } from "react-icons/fa";
-import { FaXmark } from "react-icons/fa6";
+import { FaCheck, FaExclamationTriangle } from "react-icons/fa";
+import Tab from "@mui/material/Tab";
+import { TabContext, TabList } from "@mui/lab";
 
 const ReportHeader = ({ vendors }: ResponseData) => (
   <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -19,8 +20,21 @@ const ReportHeader = ({ vendors }: ResponseData) => (
   </div>
 );
 
+const TabButton = ({ tabName, currentTab }) => (
+  <Tab
+    className={`w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
+      currentTab === tabName
+        ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
+        : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
+    }`}
+    label={tabName}
+    value={tabName}
+  />
+);
+
 const Report = () => {
-  const [tab, setTab] = useState("detection");
+  const [currentTab, setCurrentTab] = useState("geneticAnalysis");
+  const [geneticAnalysisTab, setGeneticAnalysisTab] = useState("summary");
   const [data, setData] = useState<ResponseData>();
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
@@ -30,16 +44,9 @@ const Report = () => {
     getEmail(id).then((data: ResponseData) => {
       if (data) setLoading(false);
       setData(data);
+      console.log(data);
     });
   }, [id]);
-
-  const isActiveTab = (tabName: string) => tab === tabName;
-  const tabButtonClasses = (tabName: string) =>
-    `w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
-      isActiveTab(tabName)
-        ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
-        : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
-    }`;
 
   console.log(data);
 
@@ -47,13 +54,6 @@ const Report = () => {
     <div className="container mx-auto px-4 py-8">
       {!loading && data && (
         <div>
-          <div className="flex flex-row items-center justify-between w-6/12">
-            <ReportHeader vendors={data?.vendors} />
-            <h1 className="text-2xl font-bold mb-4 dark:text-white">
-              Email Report
-            </h1>
-          </div>
-
           <div
             className={`
             ${
@@ -86,34 +86,175 @@ const Report = () => {
           </div>
 
           {/* Tabs */}
-          <div className="mt-8 relative">
-            <div className="border-b border-gray-200 dark:border-gray-700">
-              <div className="flex flex-row">
-                <button
-                  type="button"
-                  className={tabButtonClasses("detection")}
-                  onClick={() => setTab("detection")}
-                >
-                  Detection
-                </button>
-                <button
-                  type="button"
-                  className={tabButtonClasses("details")}
-                  onClick={() => setTab("details")}
-                >
-                  Details
-                </button>
+          <TabContext value={currentTab}>
+            <TabList
+              className="mt-8 border-b border-gray-200 dark:border-gray-700"
+              aria-label="Tabs"
+            >
+              <Tab
+                label="Genetic Analysis"
+                value="geneticAnalysis"
+                className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
+                  currentTab === "genetic-analysis"
+                    ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
+                    : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
+                }`}
+                onClick={() => setCurrentTab("geneticAnalysis")}
+              />
+              <Tab
+                label="Detection"
+                value="detection"
+                className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
+                  currentTab === "detection"
+                    ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
+                    : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
+                }`}
+                onClick={() => setCurrentTab("detection")}
+              />
+              <Tab
+                label="Details"
+                value="details"
+                className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
+                  currentTab === "details"
+                    ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
+                    : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
+                }`}
+                onClick={() => setCurrentTab("details")}
+              />
+            </TabList>
+          </TabContext>
+
+          {/* Genetic Analysis Tab */}
+          {currentTab === "geneticAnalysis" && (
+            <div className="mt-8">
+              <div className="flex flex-row justify-between gap-6">
+                <div className="w-4/12 h-3/6">
+                  <h2 className="dark:text-white text-xl">Attachments</h2>
+                  {data?.data.attachments?.map((attachment, index) => (
+                    <div className="mt-4 bg-surface rounded-md p-2" key={index}>
+                      <h4 className="dark:text-gray-200">
+                        {attachment.filename}
+                      </h4>
+                      <p className="dark:text-gray-500 mb-2">
+                        {attachment.checksum}
+                      </p>
+                      <p className="dark:text-gray-300">
+                        Feature not implemented
+                      </p>
+                    </div>
+                  ))}
+
+                  {data?.data.attachments?.length === 0 && (
+                    <div>
+                      <p className="dark:text-gray-300">No attachments</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="w-8/12">
+                  {/* Tabs */}
+                  <div className="relative">
+                    <div className="border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex flex-row">
+                        <TabContext value={geneticAnalysisTab}>
+                          <TabList
+                            className="mt-8 border-b border-gray-200 dark:border-gray-700"
+                            aria-label="Tabs"
+                          >
+                            <Tab
+                              label="Genetic Summary"
+                              value="summary"
+                              className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
+                                geneticAnalysisTab === "summary"
+                                  ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
+                                  : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
+                              }`}
+                              onClick={() => setGeneticAnalysisTab("summary")}
+                            />
+                            <Tab
+                              label="Detection"
+                              value="detection"
+                              className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
+                                geneticAnalysisTab === "detection"
+                                  ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
+                                  : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
+                              }`}
+                              onClick={() => setCurrentTab("detection")}
+                            />
+                            <Tab
+                              label="Details"
+                              value="details"
+                              className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
+                                geneticAnalysisTab === "details"
+                                  ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
+                                  : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
+                              }`}
+                              onClick={() => setCurrentTab("details")}
+                            />
+                          </TabList>
+                        </TabContext>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Genetic Summary Tab */}
+                  {geneticAnalysisTab === "summary" && (
+                    <div className="mt-8">
+                      <h2 className="text-xl font-bold mb-4 dark:text-white">
+                        Genetic Summary
+                      </h2>
+
+                      <h5>Email Metadata</h5>
+                      <div className="bg-white shadow dark:bg-surface overflow-hidden sm:rounded-lg">
+                        {/* Dummy genetic summary content */}
+                        <div className="p-6 dark:text-gray-400">
+                          <div className="flex flex-row justify-between">
+                            <p className="w-2/12">Size</p>
+                            <p className="w-10/12">16 KB</p>
+                          </div>
+
+                          <div className="flex flex-row justify-between">
+                            <p className="w-2/12">SHA256</p>
+                            <p className="w-10/12">
+                              b08319b4cda292dc1cbe771226fa7ac1
+                            </p>
+                          </div>
+
+                          <div className="flex flex-row justify-between">
+                            <p className="w-2/12">MD5</p>
+                            <p className="w-10/12">
+                              b08319b4cda292dc1cbe771226fa7ac1
+                            </p>
+                          </div>
+                          <div className="flex flex-row justify-between">
+                            <p className="w-2/12">MD5</p>
+                            <p className="w-10/12">
+                              b08319b4cda292dc1cbe771226fa7ac1
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white shadow dark:bg-surface overflow-hidden sm:rounded-lg">
+                        {/* Dummy genetic summary content */}
+                        <div className="p-6 dark:text-gray-400">
+                          <p className="text-lg font-semibold mb-2">
+                            Genetic Summary:
+                          </p>
+                          <p className="mb-4">
+                            Lorem ipsum dolor sit amet, consectetur adipiscing
+                            elit. Phasellus aliquam finibus fringilla.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-            <div
-              className={`absolute bottom-0 left-0 h-1 bg-indigo-600 w-1/2 ${
-                tab === "details" ? "left-1/2" : "left-0"
-              } transition-transform ease-in-out duration-300`}
-            />
-          </div>
-
+          )}
           {/* Detection Tab */}
-          {isActiveTab("detection") && (
+          {currentTab === "detection" && (
             <div className="mt-8">
               <h2 className="text-xl font-bold mb-4 dark:text-white">
                 Security vendors' analysis
@@ -134,7 +275,7 @@ const Report = () => {
                               )}
 
                               {vendor.isThreat && (
-                                <FaXmark className="text-threat-threat mr-2" />
+                                <FaExclamationTriangle className="w-5 h-5 text-red-600 mr-2" />
                               )}
 
                               <h3>{vendor.name}</h3>
@@ -163,7 +304,7 @@ const Report = () => {
           )}
 
           {/* Details Tab */}
-          {isActiveTab("details") && (
+          {currentTab === "details" && (
             <div className="mt-8">
               <h2 className="text-xl font-bold mb-4 dark:text-white">
                 Email Details

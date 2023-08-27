@@ -31,6 +31,7 @@ export default function Requests() {
     setCurrentPage(newPage);
   };
 
+  //TODO: Fix bug, when you click on the last page, it doesn't show the second page.
   const renderPaginationButtons = () => {
     const pagesToShow = Math.min(totalPages, maxPaginationButtons);
     const middlePage = Math.ceil(maxPaginationButtons / 2);
