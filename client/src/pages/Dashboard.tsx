@@ -22,7 +22,6 @@ export default function Dashboard() {
         setLoading(true);
         const emails = await getEmails();
         setData(emails);
-        console.log(emails);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {

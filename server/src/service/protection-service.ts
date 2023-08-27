@@ -16,26 +16,21 @@ type Vendors = {
 
 export const CheckIP = async (ip: string): Promise<IPResponse> => {
   const FeodotrackerAbuseCHData = await FeodotrackerAbuseCH.getInstance()
-    .getData()
+    .getData(ip)
     .then((data) => {
       return data;
     });
 
-  //print out all ip addresses in data
-  console.log(FeodotrackerAbuseCHData[0]);
-
   return {
-    threat: FeodotrackerAbuseCHData.some((item) => item.ip_address === ip),
+    threat: FeodotrackerAbuseCHData.isThreat,
     ip: "",
     country: "",
     vendors: [
       {
         name: "Feodotracker Abuse CH",
         url: "https://feodotracker.abuse.ch/blocklist/",
-        isThreat: FeodotrackerAbuseCHData.some(
-          (item) => item.ip_address === ip
-        ),
-        data: FeodotrackerAbuseCHData.filter((item) => item.ip_address === ip),
+        isThreat: FeodotrackerAbuseCHData.isThreat,
+        data: FeodotrackerAbuseCHData.data,
       },
     ],
   };

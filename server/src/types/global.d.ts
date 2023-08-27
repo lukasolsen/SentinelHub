@@ -15,15 +15,19 @@ type ResponseData = {
   ip: string;
   lastUpdated: string;
   threat?: string;
-  vendors?: Vendors[];
+  vendors?: VendorOutput[];
   data: Data;
 };
 
-type Vendors = {
+interface VendorOutput {
   name: string;
   url: string;
   isThreat: boolean;
-  data: object;
+  data?: VendorData;
+}
+
+type VendorData = {
+  tags?: string[];
 };
 
 type HeadersT = {

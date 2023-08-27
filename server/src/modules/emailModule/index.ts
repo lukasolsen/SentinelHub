@@ -5,11 +5,9 @@ import { CheckIP } from "../../service/protection-service";
 
 export const emailParsing = (req: Request, res: Response) => {
   const { emailContent } = req.body;
-  console.log("emailContent: ", emailContent);
 
   simpleParser(emailContent)
     .then((parsed) => {
-      res.setHeader("Access-Control-Allow-Origin", "*");
       res.send({ content: parsed, status: "ok" });
     })
     .catch((error) => {
@@ -31,7 +29,6 @@ export const addBadEmail = async (req: Request, res: Response) => {
         .split(";")[0];
 
       const data = await CheckIP(ip);
-      console.log(data.threat);
       badEmails.push({
         data: parsed,
         id: Math.floor(Math.random() * 1000000),
@@ -55,6 +52,7 @@ export const getBadEmails = (req: Request, res: Response) => {
 };
 
 export const getBadEmail = (req: Request, res: Response) => {
+  console.log("Contacted");
   const { id } = req.params;
   const email = badEmails.find((item) => item.id === parseInt(id));
   return res.send(email);

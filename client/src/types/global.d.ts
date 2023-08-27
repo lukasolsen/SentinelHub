@@ -14,29 +14,20 @@ type ResponseData = {
   id: number;
   ip: string;
   lastUpdated: string;
-  threat: string;
-  vendors?: Vendors[];
+  threat?: string;
+  vendors: VendorOutput[];
   data: Data;
-  hash: string;
 };
 
-type Vendors = {
+interface VendorOutput {
   name: string;
   url: string;
   isThreat: boolean;
-  data?: VendorData[];
-};
+  data?: VendorData;
+}
 
 type VendorData = {
-  as_name?: string;
-  as_number?: number;
-  country?: string;
-  ip_address?: string;
-  last_seen?: string;
-  malware?: string;
-  port?: number;
-  status?: string;
-  hostname?: string;
+  tags?: string[];
 };
 
 type HeadersT = {
@@ -54,7 +45,7 @@ type HeaderLine = {
 };
 
 type FromType = {
-  value: FromValueTypew;
+  value: FromValueTypew[];
   html: string;
   text: string;
 };

@@ -39,10 +39,11 @@ export default {
           info: "#40BFFF",
           success: "#4CAF50",
         },
-        // threat and Suspicious
+        // Threat and Suspicious
         threat: {
-          threat: "#FF3838",
-          suspicious: "#FFD700",
+          threat: "#7E0A0A", // Darker red
+          suspicious: "#9A8400", // Darker yellow
+          safe: "#4CAF50", // Darker green
         },
         // Inputs
         input: {

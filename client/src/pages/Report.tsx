@@ -1,62 +1,51 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import DetectionWheel from "../components/DetectionWheel";
-import { Badge } from "../components/comps/Badge";
 import { useParams } from "react-router-dom";
 import { getEmail } from "../service/api-service";
 import { FaCheck } from "react-icons/fa";
 import { FaXmark } from "react-icons/fa6";
 
-const vendorsData = [
-  {
-    name: "Vendor A",
-    tags: ["Trojan", "Malware"],
-    detectionRate: "90%",
-    lastUpdated: "2023-08-25",
-  },
-  {
-    name: "Vendor B",
-    tags: ["Virus", "Spyware"],
-    detectionRate: "85%",
-    lastUpdated: "2023-08-24",
-  },
-  // ... Add more vendor data
-];
-
 const ReportHeader = ({ vendors }: ResponseData) => (
   <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-    <dd className="mt-1 sm:mt-0 sm:col-span-2">
-      <DetectionWheel
-        totalVendors={vendors.length}
-        threatVendors={vendors.filter((vendor) => vendor.isThreat).length}
-        unsecureVendors={0}
-      />
-    </dd>
+    {vendors.length > 0 && (
+      <dd className="mt-1 sm:mt-0 sm:col-span-2">
+        <DetectionWheel
+          totalVendors={vendors.length}
+          threatVendors={vendors.filter((vendor) => vendor.isThreat).length}
+          unsecureVendors={0}
+        />
+      </dd>
+    )}
   </div>
 );
 
 const Report = () => {
   const [tab, setTab] = useState("detection");
   const [data, setData] = useState<ResponseData>();
+  const [loading, setLoading] = useState(true);
   const { id } = useParams();
 
   useEffect(() => {
+    if (!id) return;
     getEmail(id).then((data: ResponseData) => {
+      if (data) setLoading(false);
       setData(data);
-      console.log(data);
     });
   }, [id]);
 
-  const isActiveTab = (tabName) => tab === tabName;
-  const tabButtonClasses = (tabName) =>
+  const isActiveTab = (tabName: string) => tab === tabName;
+  const tabButtonClasses = (tabName: string) =>
     `w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
       isActiveTab(tabName)
         ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
         : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
     }`;
 
+  console.log(data);
+
   return (
     <div className="container mx-auto px-4 py-8">
-      {data && (
+      {!loading && data && (
         <div>
           <div className="flex flex-row items-center justify-between w-6/12">
             <ReportHeader vendors={data?.vendors} />
@@ -69,7 +58,7 @@ const Report = () => {
             className={`
             ${
               (data.threat !== "Safe" && "bg-threat-threat") ||
-              (data.threat === "Safe" && "bg-severity-success")
+              (data.threat === "Safe" && "bg-threat-safe")
             }
             } rounded-md p-4 mb-4`}
           >
@@ -77,17 +66,27 @@ const Report = () => {
               Report for <span className="text-blue-500 underline">#{id}</span>
             </h2>
             <p className="text-xl text-white">Hash: {data?.hash}</p>
-            {data.vendors?.some((vendor) => vendor.data[0]?.malware) && (
-              <span className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400">
-                {data.vendors
-                  .map((vendor) => vendor.data[0]?.malware)
-                  .join(", ")}
-              </span>
+            {data.vendors?.some((vendor) => vendor.data?.tags) && (
+              <div className="flex flex-row items-center mt-2">
+                {/* Display all the tags from all vendors */}
+                {data.vendors.map((vendor, index) => (
+                  <div key={index} className="flex flex-row items-center">
+                    {vendor.data?.tags?.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
           {/* Tabs */}
-          <div className="mt-8">
+          <div className="mt-8 relative">
             <div className="border-b border-gray-200 dark:border-gray-700">
               <div className="flex flex-row">
                 <button
@@ -106,6 +105,11 @@ const Report = () => {
                 </button>
               </div>
             </div>
+            <div
+              className={`absolute bottom-0 left-0 h-1 bg-indigo-600 w-1/2 ${
+                tab === "details" ? "left-1/2" : "left-0"
+              } transition-transform ease-in-out duration-300`}
+            />
           </div>
 
           {/* Detection Tab */}
@@ -118,7 +122,10 @@ const Report = () => {
                 <ul className="divide-y divide-gray-300 dark:divide-gray-700">
                   {data.vendors &&
                     data.vendors.map((vendor, index) => (
-                      <li key={index} className="px-4 py-4 sm:px-6">
+                      <li
+                        key={index}
+                        className="px-4 py-4 sm:px-6 flex-row flex items-center justify-between"
+                      >
                         <div className="flex items-center justify-between">
                           <div className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
                             <div className="flex flex-row items-center justify-evenly">
@@ -133,32 +140,18 @@ const Report = () => {
                               <h3>{vendor.name}</h3>
                             </div>
                           </div>
-
-                          {vendor.data[0]?.status && (
-                            <div
-                              className={`text-sm text-gray-500 dark:text-gray-400 ${
-                                vendor.data[0].status === "online" &&
-                                "dark:text-green-500 text-green-500"
-                              } ${
-                                vendor.data[0].status === "offline" &&
-                                "dark:text-red-500 text-red-500"
-                              }`}
-                            >
-                              {vendor.data[0].status}
-                            </div>
-                          )}
                         </div>
-                        <div className="mt-2 sm:flex sm:justify-between">
-                          {vendor.data[0]?.malware && (
-                            <div className="sm:flex">
-                              <span className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400">
-                                {vendor.data[0]?.malware}
-                              </span>
-                            </div>
-                          )}
-                          {vendor.data[0]?.status && (
-                            <div className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0">
-                              Last seen online: {vendor.data[0]?.last_online}
+                        <div className="sm:flex sm:justify-between sm:items-center">
+                          {vendor.data?.tags && (
+                            <div className="sm:flex sm:items-center">
+                              {vendor.data?.tags?.map((tag, index) => (
+                                <span
+                                  key={index}
+                                  className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
                             </div>
                           )}
                         </div>
@@ -198,18 +191,14 @@ const Report = () => {
         </div>
       )}
 
-      {!data ||
-        !data.vendors ||
-        (data.vendors.length > 1 && (
-          <div className="flex flex-col items-center justify-center">
-            <h1 className="text-2xl font-bold mb-4 dark:text-white">
-              Email Report
-            </h1>
-            <h2 className="text-xl font-bold mb-4 dark:text-white">
-              Loading...
-            </h2>
-          </div>
-        ))}
+      {loading && (
+        <div className="flex flex-col items-center justify-center">
+          <h1 className="text-2xl font-bold mb-4 dark:text-white">
+            Email Report
+          </h1>
+          <h2 className="text-xl font-bold mb-4 dark:text-white">Loading...</h2>
+        </div>
+      )}
     </div>
   );
 };

@@ -13,10 +13,10 @@ import {
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT || 1200;
-
 app.use(express.json());
 app.use(cors());
+
+const port = process.env.PORT || 1200;
 
 app.post("/api/parse-email", emailParsing);
 

@@ -40,35 +40,41 @@ export class FeodotrackerAbuseCH {
     return FeodotrackerAbuseCH.instance;
   }
 
-  async getData(): Promise<FeodotrackerAbuseCHResp[]> {
+  async getData(ip: string): Promise<VendorOutput> {
     if (this.data.length === 0) {
       const dataPromises = this.urls.map((url) => getData(url));
       const dataArray = await Promise.all(dataPromises);
-      this.data = dataArray.reduce((acc, data) => acc.concat(data), []);
+
+      // Merge arrays and remove duplicates
+      this.data = dataArray.reduce((acc, data) => {
+        data.forEach((item) => {
+          if (
+            !acc.some(
+              (existingItem) => existingItem.ip_address === item.ip_address
+            )
+          ) {
+            acc.push(item);
+          }
+        });
+        return acc;
+      }, []);
       console.log("feodotracker abuse ch data fetched");
     } else {
       console.log("feodotracker abuse ch data already fetched");
     }
-    return this.data;
-  }
 
-  async getIPs() {
-    const data = await this.getData();
-    console.log(data);
-    return data.map((item: FeodotrackerAbuseCHResp) => item.ip_address);
-  }
+    const isThreat = this.data.some((item) => item.ip_address === ip);
+    const threatData = {
+      tags: this.data
+        .filter((item) => item.ip_address === ip)
+        .map((item) => item.malware),
+    };
 
-  async getIPsByCountry(country: string) {
-    const data = await this.getData();
-    return data
-      .filter((item: FeodotrackerAbuseCHResp) => item.country === country)
-      .map((item: FeodotrackerAbuseCHResp) => item.ip_address);
-  }
-
-  async getIPsByMalware(malware: string) {
-    const data = await this.getData();
-    return data
-      .filter((item: FeodotrackerAbuseCHResp) => item.malware === malware)
-      .map((item: FeodotrackerAbuseCHResp) => item.ip_address);
+    return {
+      name: "Feodotracker Abuse CH",
+      url: "https://feodotracker.abuse.ch/blocklist/",
+      isThreat: isThreat,
+      data: threatData,
+    };
   }
 }

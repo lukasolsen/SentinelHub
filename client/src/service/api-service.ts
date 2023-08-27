@@ -1,85 +1,94 @@
 import axios from "axios";
 import { getIPAddress } from "./util-service";
 
-export const sendEmailContent = async (emailContent: string): any => {
+type EmailContentRequest = {
+  emailContent: string;
+  ip_address: string;
+};
+
+type ErrorResponse = {
+  error: string;
+};
+
+const makeGetRequest = async <T>(
+  api: string,
+  params?: Record<string, string>
+): Promise<T | ErrorResponse> => {
+  const ip_address = await getIPAddress();
+
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  const queryParams = params ? { ...params, ip_address } : { ip_address };
+
+  try {
+    const response = await axios.get(api, {
+      headers,
+      params: queryParams,
+    });
+    return response.data as T;
+  } catch (error) {
+    return { error: error.message };
+  }
+};
+
+const makePostRequest = async <T>(
+  api: string,
+  requestData?: EmailContentRequest | BadEmailRequest
+): Promise<T | ErrorResponse> => {
+  const ip_address = await getIPAddress();
+
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  if (requestData) {
+    requestData.ip_address = ip_address;
+  }
+
+  try {
+    const response = await axios.post(api, requestData, { headers });
+    return response.data as T;
+  } catch (error) {
+    return { error: error.message };
+  }
+};
+
+export const sendEmailContent = async (
+  emailContent: string
+): Promise<ErrorResponse | VendorOutput> => {
   const api = "http://localhost:1200/api/parse-email";
 
-  const ip_address = await getIPAddress();
-  // we need to have Access-Control-Allow-Origin in header
-  return axios
-    .post(
-      api,
-      {
-        emailContent: emailContent,
-        ip_address: ip_address,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
-    .then((response) => {
-      return response;
-    })
-    .catch((error) => {
-      return error;
-    });
+  const queryParams = {
+    emailContent,
+  };
+
+  return makePostRequest<VendorOutput>(api, queryParams);
 };
 
-export const addEmailContent = async (emailContent: string): any => {
+export const addEmailContent = async (
+  emailContent: string
+): Promise<ErrorResponse | VendorOutput> => {
   const api = "http://localhost:1200/api/add-bad-email";
 
-  const ip_address = await getIPAddress();
+  const queryParams = {
+    emailContent,
+  };
 
-  return axios
-    .post(
-      api,
-      {
-        emailContent: emailContent,
-        ip_address: ip_address,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
-    .then((response) => {
-      return response;
-    })
-    .catch((error) => {
-      return error;
-    });
+  return makePostRequest<VendorOutput>(api, queryParams);
 };
 
-export const getEmails = async (): any => {
+export const getEmails = async (): Promise<ErrorResponse | VendorOutput[]> => {
   const api = "http://localhost:1200/api/bad-emails";
 
-  const ip_address = await getIPAddress();
-
-  return axios
-    .post(api)
-    .then((response) => {
-      console.log(response.data);
-      return response.data;
-    })
-    .catch((error) => {
-      return error;
-    });
+  return makePostRequest<VendorOutput[]>(api);
 };
 
-export const getEmail = async (id: string): any => {
+export const getEmail = async (
+  id: string
+): Promise<ErrorResponse | VendorOutput> => {
   const api = `http://localhost:1200/api/bad-email/${id}`;
 
-  const ip_address = await getIPAddress();
-
-  return axios
-    .get(api)
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      return error;
-    });
-}
+  return makeGetRequest<VendorOutput>(api);
+};
