@@ -16,7 +16,7 @@ export const emailParsing = (req: Request, res: Response) => {
     });
 };
 
-const badEmails: ResponseData[] = [];
+const badEmails: IDataOutput[] = [];
 
 export const addBadEmail = async (req: Request, res: Response) => {
   const { emailContent } = req.body;
@@ -31,15 +31,25 @@ export const addBadEmail = async (req: Request, res: Response) => {
       const data = await CheckIP(ip);
       badEmails.push({
         data: parsed,
-        id: Math.floor(Math.random() * 1000000),
-        lastUpdated: new Date().toString(),
-        ip: ip,
-        hash: generateHash(parsed.from.value[0].address),
+        reportId: Math.floor(Math.random() * 1000000),
+        timestamp: new Date().toString(),
+        emailHash: generateHash(parsed.from.value[0].address),
+        tags: data.tags,
+
+        metadata: {
+          size: data.size,
+          subject: parsed.subject,
+          from: parsed.from.value[0].address,
+          to: parsed.to.value[0].address,
+          date: parsed.date,
+          ip: ip,
+        },
+
         vendors: data.vendors,
-        threat: data.threat ? "Threat" : "Safe",
+        verdict: data.verdict,
       });
 
-      res.send({ status: "ok", id: badEmails[badEmails.length - 1].id });
+      res.send({ status: "ok", id: badEmails[badEmails.length - 1].reportId });
     })
     .catch((error) => {
       console.error("Error parsing email:", error);
@@ -48,12 +58,44 @@ export const addBadEmail = async (req: Request, res: Response) => {
 };
 
 export const getBadEmails = (req: Request, res: Response) => {
+  const emails = badEmails;
+  //Remove a metadata.to key from each email
+  emails.forEach((email) => {
+    delete email.metadata.to;
+  });
   return res.send(badEmails);
 };
 
 export const getBadEmail = (req: Request, res: Response) => {
   console.log("Contacted");
   const { id } = req.params;
-  const email = badEmails.find((item) => item.id === parseInt(id));
+  const email = badEmails.find((item) => item.reportId === parseInt(id));
+  delete email.metadata.to;
   return res.send(email);
+};
+
+export const getRelatedReports = (req: Request, res: Response) => {
+  const { ip, id, verdict } = req.params;
+
+  if (ip) {
+    const emails = badEmails.filter((item) => item.metadata.ip === ip);
+    emails.forEach((email) => {
+      delete email.metadata.to;
+    });
+    return res.send(emails);
+  }
+
+  if (id) {
+    const email = badEmails.find((item) => item.reportId === parseInt(id));
+    delete email.metadata.to;
+    return res.send(email);
+  }
+
+  if (verdict) {
+    const emails = badEmails.filter((item) => item.threat === verdict);
+    emails.forEach((email) => {
+      delete email.metadata.to;
+    });
+    return res.send(emails);
+  }
 };

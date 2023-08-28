@@ -14,7 +14,7 @@ type ResponseData = {
   id: number;
   ip: string;
   lastUpdated: string;
-  threat?: string;
+  verdict?: string;
   vendors: VendorOutput[];
   data: Data;
 };

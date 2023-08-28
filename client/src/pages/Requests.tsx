@@ -114,7 +114,7 @@ export default function Requests() {
           <tr>
             <th className="py-3 px-6 text-left dark:text-white text-gray-900 w-1/6">
               <div>
-                Status
+                Verdict
                 <hr className="border-gray-700 dark:border-gray-100 border w-full" />
               </div>
             </th>
@@ -137,8 +137,8 @@ export default function Requests() {
             <tr key={index}>
               <td className="py-4 px-6">
                 <div className="flex items-center dark:text-white text-gray-950">
-                  {d.threat ? (
-                    d.threat === "Threat" ? (
+                  {d.verdict ? (
+                    d.verdict === "Threat" ? (
                       <FaExclamationTriangle className="w-5 h-5 text-red-600 mr-2" />
                     ) : (
                       <FaCheck className="w-5 h-5 text-green-600 mr-2" />
@@ -146,32 +146,30 @@ export default function Requests() {
                   ) : (
                     <FaCheck className="w-5 h-5 text-green-600 dark:text-green-300 mr-2" />
                   )}
-                  {d.threat || "Safe"}
+                  {d.verdict || "Safe"}
                 </div>
               </td>
               <td className="py-4 px-6">
                 <a
-                  href={`/report/${d.id}`}
+                  href={`/report/${d.reportId}`}
                   className="text-blue-500 dark:text-blue-300 hover:underline"
                 >
-                  {d.ip} {"<"}
+                  {d.reportId} {"<"}
                   {d.data.from.value[0].address}
                   {">"}
                 </a>
               </td>
               <td className="py-4 px-6">
-                {d.vendors.map((vendor, index) => (
-                  <div key={index} className="flex flex-row items-center">
-                    {vendor.data?.tags?.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                ))}
+                <div key={index} className="flex flex-row items-center">
+                  {d.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </td>
             </tr>
           ))}

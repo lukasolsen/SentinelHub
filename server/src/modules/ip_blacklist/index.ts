@@ -8,7 +8,7 @@ import { getData } from "../../service/fetcher-service";
 type FeodotrackerAbuseCHResp = {
   ip_address: string;
   port: number;
-  status: string;
+  verdict: string;
   hostname: string;
   as_number: number;
   as_name: string;

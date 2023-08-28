@@ -1,8 +1,9 @@
 import { FeodotrackerAbuseCH } from "../modules/ip_blacklist";
 
 type IPResponse = {
-  threat: boolean;
-  ip: string;
+  verdict: string;
+  size: number;
+  tags: string[];
   country: string;
   vendors: Vendors[];
 };
@@ -21,10 +22,13 @@ export const CheckIP = async (ip: string): Promise<IPResponse> => {
       return data;
     });
 
+  const isThreat = FeodotrackerAbuseCHData.isThreat;
+
   return {
-    threat: FeodotrackerAbuseCHData.isThreat,
-    ip: "",
-    country: "",
+    verdict: isThreat ? "Threat" : "Safe",
+    country: "Norway",
+    size: 123,
+    tags: ["Malware", "Botnet", "C&C", "Spam"],
     vendors: [
       {
         name: "Feodotracker Abuse CH",
