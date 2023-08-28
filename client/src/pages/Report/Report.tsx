@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import DetectionWheel from "../../components/DetectionWheel";
 import { useParams } from "react-router-dom";
-import { getEmail } from "../../service/api-service";
+import { getEmail, getRelatedReports } from "../../service/api-service";
 import { FaCheck, FaExclamationTriangle } from "react-icons/fa";
 import GeneticAnalysis from "./components/geneticAnalysis";
 import Tab from "@mui/material/Tab";
@@ -36,20 +36,26 @@ const TabButton = ({ tabName, currentTab }) => (
 const Report = () => {
   const [currentTab, setCurrentTab] = useState("geneticAnalysis");
 
-  const [data, setData] = useState<ResponseData>();
+  const [data, setData] = useState<IDataOutput>();
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
 
   useEffect(() => {
     if (!id) return;
-    getEmail(id).then((data: ResponseData) => {
+    getEmail(id).then((data: IDataOutput) => {
       if (!data.error) setLoading(false);
       setData(data);
       console.log(data);
     });
   }, [id]);
 
-  console.log(data);
+  useEffect(() => {
+    getRelatedReports(data?.metadata?.ip, data?.reportId, data?.verdict).then(
+      (data) => {
+        console.log(data);
+      }
+    );
+  }, [data]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -130,42 +136,50 @@ const Report = () => {
               <div className="bg-white shadow dark:bg-surface overflow-hidden sm:rounded-lg">
                 <ul className="divide-y divide-gray-300 dark:divide-gray-700">
                   {data.vendors &&
-                    data.vendors.map((vendor, index) => (
-                      <li
-                        key={index}
-                        className="px-4 py-4 sm:px-6 flex-row flex items-center justify-between"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                            <div className="flex flex-row items-center justify-evenly">
-                              {!vendor.isThreat && (
-                                <FaCheck className="text-severity-success mr-2" />
-                              )}
+                    data.vendors
+                      .slice()
+                      .sort((a, b) => {
+                        // Sort by threat status first, then by name
+                        if (a.isThreat && !b.isThreat) return -1;
+                        if (!a.isThreat && b.isThreat) return 1;
+                        return a.name.localeCompare(b.name);
+                      })
+                      .map((vendor, index) => (
+                        <li
+                          key={index}
+                          className="px-4 py-4 sm:px-6 flex-row flex items-center justify-between"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                              <div className="flex flex-row items-center justify-evenly">
+                                {!vendor.isThreat && (
+                                  <FaCheck className="text-severity-success mr-2" />
+                                )}
 
-                              {vendor.isThreat && (
-                                <FaExclamationTriangle className="w-5 h-5 text-red-600 mr-2" />
-                              )}
+                                {vendor.isThreat && (
+                                  <FaExclamationTriangle className="w-5 h-5 text-red-600 mr-2" />
+                                )}
 
-                              <h3>{vendor.name}</h3>
+                                <h3>{vendor.name}</h3>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="sm:flex sm:justify-between sm:items-center">
-                          {vendor.data?.tags && (
-                            <div className="sm:flex sm:items-center">
-                              {vendor.data?.tags?.map((tag, index) => (
-                                <span
-                                  key={index}
-                                  className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </li>
-                    ))}
+                          <div className="sm:flex sm:justify-between sm:items-center">
+                            {vendor.data?.tags && (
+                              <div className="sm:flex sm:items-center">
+                                {vendor.data?.tags?.map((tag, index) => (
+                                  <span
+                                    key={index}
+                                    className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </li>
+                      ))}
                 </ul>
               </div>
             </div>

@@ -127,7 +127,7 @@ export default function GeneticAnalysis({ data }) {
                   Actions
                 </button>
               </div>
-
+              {/*
               <div className="mt-8">
                 <ul>
                   <li className="bg-white dark:bg-surface shadow-md rounded-md p-4 mb-2">
@@ -236,6 +236,7 @@ export default function GeneticAnalysis({ data }) {
                   </li>
                 </ul>
               </div>
+            */}
 
               <div className="mt-8">
                 <h5>Email Metadata</h5>

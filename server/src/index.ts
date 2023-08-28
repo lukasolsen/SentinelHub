@@ -1,13 +1,12 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import { FeodotrackerAbuseCH } from "./modules/ip_blacklist";
-import { simpleParser, ParsedMail } from "mailparser";
 import {
   addBadEmail,
   emailParsing,
   getBadEmail,
   getBadEmails,
+  getRelatedReports,
 } from "./modules/emailModule";
 
 dotenv.config();
@@ -25,6 +24,8 @@ app.post("/api/add-bad-email", addBadEmail);
 app.post("/api/bad-emails", getBadEmails);
 
 app.get("/api/bad-email/:id", getBadEmail);
+
+app.post("/api/related-reports", getRelatedReports);
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);

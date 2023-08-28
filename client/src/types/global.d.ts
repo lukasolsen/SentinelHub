@@ -10,14 +10,27 @@ type Data = {
   to: FromType;
 };
 
-type ResponseData = {
-  id: number;
-  ip: string;
-  lastUpdated: string;
-  verdict?: string;
-  vendors: VendorOutput[];
+interface IDataOutput {
   data: Data;
-};
+  emailHash: string;
+  metadata: IMetadata;
+  reportId: number;
+  tags: string[];
+  verdict: string;
+  timestamp: string;
+  vendors: VendorOutput[];
+}
+
+interface IMetadata {
+  date: string;
+  from: string;
+  to?: string;
+  ip: string;
+  size: number;
+  subject: string;
+  md5: string;
+  sha256: string;
+}
 
 interface VendorOutput {
   name: string;
@@ -45,7 +58,7 @@ type HeaderLine = {
 };
 
 type FromType = {
-  value: FromValueTypew[];
+  value: FromValueTypew;
   html: string;
   text: string;
 };

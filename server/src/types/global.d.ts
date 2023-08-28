@@ -36,6 +36,7 @@ interface VendorOutput {
   name: string;
   url: string;
   isThreat: boolean;
+  tags: string[];
   data?: VendorData;
 }
 

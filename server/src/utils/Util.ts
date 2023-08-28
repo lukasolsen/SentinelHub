@@ -5,3 +5,9 @@ export const generateHash = (email: string) => {
   hash.update(email);
   return hash.digest("hex");
 };
+
+export const generateMD5 = (email: string) => {
+  const hash = crypto.createHash("md5");
+  hash.update(email);
+  return hash.digest("hex");
+};

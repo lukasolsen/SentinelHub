@@ -87,8 +87,25 @@ export const getEmails = async (): Promise<ErrorResponse | VendorOutput[]> => {
 
 export const getEmail = async (
   id: string
-): Promise<ErrorResponse | VendorOutput> => {
+): Promise<ErrorResponse | IDataOutput> => {
   const api = `http://localhost:1200/api/bad-email/${id}`;
 
-  return makeGetRequest<VendorOutput>(api);
+  return makeGetRequest<IDataOutput>(api);
+};
+
+export const getRelatedReports = async (
+  ip: string,
+  id: string,
+  verdict: string
+): Promise<ErrorResponse | VendorOutput[]> => {
+  console.log(ip, id, verdict);
+  const api = `http://localhost:1200/api/related-reports`;
+  //Make the things in body
+  const queryParams = {
+    ip,
+    id,
+    verdict,
+  };
+
+  return makePostRequest<VendorOutput[]>(api, queryParams);
 };

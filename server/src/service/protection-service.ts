@@ -1,4 +1,7 @@
-import { FeodotrackerAbuseCH } from "../modules/ip_blacklist";
+import {
+  FeodotrackerAbuseCH,
+  StrictBlockPAlleboneBlockIP,
+} from "../modules/ip_blacklist";
 
 type IPResponse = {
   verdict: string;
@@ -12,6 +15,7 @@ type Vendors = {
   name: string;
   url: string;
   isThreat: boolean;
+  tags: string[];
   data: object;
 };
 
@@ -22,20 +26,46 @@ export const CheckIP = async (ip: string): Promise<IPResponse> => {
       return data;
     });
 
-  const isThreat = FeodotrackerAbuseCHData.isThreat;
+  const StrictBlockPAlleboneBlockIPData =
+    await StrictBlockPAlleboneBlockIP.getInstance()
+      .getData(ip)
+      .then((data) => {
+        return data;
+      });
+
+  //For the isThreat, we need to check if any of the vendors have isThreat = true
+
+  const isThreat =
+    FeodotrackerAbuseCHData.isThreat ||
+    StrictBlockPAlleboneBlockIPData.isThreat;
+
+  const vendors = [
+    {
+      name: "Feodotracker Abuse CH",
+      url: "https://feodotracker.abuse.ch/blocklist/",
+      isThreat: FeodotrackerAbuseCHData.isThreat,
+      tags: FeodotrackerAbuseCHData.tags,
+      data: FeodotrackerAbuseCHData.data,
+    },
+    {
+      name: "Strict BlockP Allebone Block IP",
+      url: StrictBlockPAlleboneBlockIPData.url,
+      isThreat: StrictBlockPAlleboneBlockIPData.isThreat,
+      tags: StrictBlockPAlleboneBlockIPData.tags,
+      data: StrictBlockPAlleboneBlockIPData.data,
+    },
+  ];
 
   return {
     verdict: isThreat ? "Threat" : "Safe",
     country: "Norway",
     size: 123,
-    tags: ["Malware", "Botnet", "C&C", "Spam"],
-    vendors: [
-      {
-        name: "Feodotracker Abuse CH",
-        url: "https://feodotracker.abuse.ch/blocklist/",
-        isThreat: FeodotrackerAbuseCHData.isThreat,
-        data: FeodotrackerAbuseCHData.data,
-      },
+    tags: [
+      vendors
+        .map((vendor) => vendor.tags)
+        .toString()
+        .replace(",", ""),
     ],
+    vendors,
   };
 };
