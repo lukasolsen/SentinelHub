@@ -46,7 +46,7 @@ export default function AddReport() {
             <textarea
               id="emailContent"
               rows={8}
-              className="block w-full p-3 text-sm text-gray-900 bg-input-large rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-input-large dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="block w-full p-3 text-sm text-gray-900 bg-input-large rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-input-large dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:bg-card"
               placeholder="Paste the email content here..."
               onChange={(e) => setEmailContent(e.target.value)}
               value={emailContent}
@@ -61,7 +61,7 @@ export default function AddReport() {
             </Link>
             <button
               type="button"
-              className="ml-4 inline-block px-4 py-2 text-sm font-medium text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:outline-none focus:ring focus:ring-primary-200"
+              className="ml-4 inline-block px-4 py-2 text-sm font-medium dark:text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:outline-none focus:ring focus:ring-primary-200 text-bodyTextWhite"
               onClick={() => submitContent()}
             >
               Next

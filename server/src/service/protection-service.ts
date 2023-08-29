@@ -56,16 +56,13 @@ export const CheckIP = async (ip: string): Promise<IPResponse> => {
     },
   ];
 
+  const tagsArray = vendors.map((vendor) => vendor.tags);
+
   return {
     verdict: isThreat ? "Threat" : "Safe",
     country: "Norway",
     size: 123,
-    tags: [
-      vendors
-        .map((vendor) => vendor.tags)
-        .toString()
-        .replace(",", ""),
-    ],
+    tags: tagsArray.flat(),
     vendors,
   };
 };

@@ -39,6 +39,13 @@ interface VendorOutput {
   data?: VendorData;
 }
 
+type Relations = {
+  reports: {
+    equalIPs: IDataOutput[];
+    equalVerdicts: IDataOutput[];
+  };
+};
+
 type VendorData = {
   tags?: string[];
 };

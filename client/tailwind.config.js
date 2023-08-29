@@ -1,44 +1,64 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./src/**/*.tsx", "./node_modules/flowbite/**/*.js"],
-  darkMode: "media",
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        // Main Global Background
+        // Global Colors
         background: "#0D0D15",
         // Other backgrounds
         surface: "#1A1A24",
         card: "#1F1F29",
         modal: "rgba(13, 13, 21, 0.9)",
-        // Text colors
-        text: {
-          primary: "#FFFFFF",
-          secondary: "#BDBDBD",
-          dark: "#7E7E7E",
-          error: "#FF3E3E",
+        primary: "#5E73FF",
+        secondary: "#FF8E44",
+
+        // Text Colors
+        bodyTextWhite: "#20242c",
+        // ... (other colors)
+      },
+      fontSize: {
+        // Font Sizes
+        xs: "0.625rem", // 10px
+        sm: "0.75rem", // 12px
+        mid_sm: "0.8125rem", // 13px
+        base: "0.900rem", // 14px
+        lg: "1rem", // 16px
+        xl: "1.125rem", // 18px
+        // ... (other font sizes)
+      },
+
+      severity: {
+        severe: "#FF3E3E",
+        moderate: "#F29E4E",
+        minor: "#FFD700",
+        info: "#40BFFF",
+        success: "#4CAF50",
+      },
+      components: {
+        // Pre-defined Components
+        card: {
+          backgroundColor: "#1F1F29",
+          borderColor: "#333",
+          padding: "1rem",
+          borderRadius: "0.5rem",
         },
-        // Button colors
         button: {
           primary: {
-            light: "#5E73FF",
-            DEFAULT: "#35459E",
-            dark: "#222E5F",
+            backgroundColor: "#5E73FF",
+            textColor: "#FFFFFF",
+            hoverBackgroundColor: "#35459E",
           },
           secondary: {
-            light: "#FF8E44",
-            DEFAULT: "#E65E00",
-            dark: "#A04300",
+            backgroundColor: "#FF8E44",
+            textColor: "#FFFFFF",
+            hoverBackgroundColor: "#E65E00",
           },
+          // ... (other button styles)
         },
         // Severity levels
-        severity: {
-          severe: "#FF3E3E",
-          moderate: "#F29E4E",
-          minor: "#FFD700",
-          info: "#40BFFF",
-          success: "#4CAF50",
-        },
+
         // Threat and Suspicious
         threat: {
           threat: "#7E0A0A", // Darker red

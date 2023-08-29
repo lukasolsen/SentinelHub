@@ -3,11 +3,11 @@ import App from "./App.tsx";
 import "./index.css";
 import Navbar from "./components/Navbar.tsx";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import Dashboard from "./pages/Dashboard.tsx";
 import { ThemeProvider, createTheme } from "@mui/material";
 import AddReport from "./pages/AddReport.tsx";
 import Report from "./pages/Report/Report.tsx";
 import Requests from "./pages/Requests.tsx";
+import { TThemeProvider } from "./providers/TThemeProvider.tsx";
 
 const router = createBrowserRouter([
   {
@@ -32,10 +32,10 @@ const router = createBrowserRouter([
   },
 ]);
 
-const theme = () =>
+export const MUITheme = () =>
   createTheme({
     palette: {
-      mode: "dark", //let's use the same dark/light mode as the global theme
+      mode: "light", //let's use the same dark/light mode as the global theme
       //TODO: make background be transparent
       primary: {
         main: "rgb(63 131 248)", //add in a custom color for the toolbar alert background stuff
@@ -66,10 +66,12 @@ const theme = () =>
   });
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <ThemeProvider theme={theme}>
-    <div className="dark:bg-background bg-slate-100 overscroll-auto h-full min-h-screen">
-      <Navbar />
-      <RouterProvider router={router} />
-    </div>
+  <ThemeProvider theme={MUITheme}>
+    <TThemeProvider>
+      <div className="dark:bg-background bg-slate-100 overscroll-auto h-full min-h-screen">
+        <Navbar />
+        <RouterProvider router={router} />
+      </div>
+    </TThemeProvider>
   </ThemeProvider>
 );

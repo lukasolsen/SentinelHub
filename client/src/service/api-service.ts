@@ -35,7 +35,7 @@ const makeGetRequest = async <T>(
 
 const makePostRequest = async <T>(
   api: string,
-  requestData?: EmailContentRequest | BadEmailRequest
+  requestData?: EmailContentRequest
 ): Promise<T | ErrorResponse> => {
   const ip_address = await getIPAddress();
 
@@ -95,7 +95,7 @@ export const getEmail = async (
 
 export const getRelatedReports = async (
   ip: string,
-  id: string,
+  id: number,
   verdict: string
 ): Promise<ErrorResponse | VendorOutput[]> => {
   console.log(ip, id, verdict);

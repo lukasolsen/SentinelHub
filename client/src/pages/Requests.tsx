@@ -67,8 +67,8 @@ export default function Requests() {
           key={i}
           className={`px-4 py-2 rounded-lg ${
             i === currentPage
-              ? "border-blue-500 border text-white"
-              : "border-gray-200 border text-gray-600 dark:text-gray-400"
+              ? "border-blue-500 border dark:text-white text-bodyTextWhite"
+              : "border-gray-200 border text-bodyTextWhite dark:text-gray-400"
           }`}
           onClick={() => handlePageChange(i)}
         >

@@ -1,19 +1,29 @@
 import React, { useState } from "react";
 import { TabContext, TabList } from "@mui/lab";
 import Tab from "@mui/material/Tab";
-import { FaBug, FaCheckCircle, FaQuestionCircle } from "react-icons/fa";
+import {
+  FaBug,
+  FaCheckCircle,
+  FaQuestion,
+  FaQuestionCircle,
+} from "react-icons/fa";
 
-type Relations = {
-  reports: {
-    equalIPs: IDataOutput[];
-    equalVerdicts: IDataOutput[];
-  };
-};
-
-export default function GeneticAnalysis({ data, relations }) {
+export default function GeneticAnalysis({
+  data,
+  relations,
+}: {
+  data: IDataOutput;
+  relations: Relations;
+}) {
   console.log(relations?.reports?.equalIPs);
   const [geneticAnalysisTab, setGeneticAnalysisTab] = useState("summary");
-  const [selectedSample, setSelectedSample] = useState("ip");
+
+  // check if the vendor is a threat, if it is count it in
+  /*const threatVendorsAmount = data?.vendors?.filter(
+    (vendor) => vendor.isThreat === true
+  ).length;
+  const totalVendorsAmount = data?.vendors?.length;
+  const safeVendorsAmount = totalVendorsAmount - threatVendorsAmount;*/
 
   return (
     <div className="mt-8">
@@ -38,53 +48,48 @@ export default function GeneticAnalysis({ data, relations }) {
         <div className="w-8/12">
           {/* Tabs */}
           <div className="relative">
-            <div className="border-b border-gray-200 dark:border-gray-700">
-              <div className="flex flex-row">
-                <TabContext value={geneticAnalysisTab}>
-                  <TabList
-                    className="mt-8 border-b border-gray-200 dark:border-gray-700"
-                    aria-label="Tabs"
-                  >
-                    <Tab
-                      label="Genetic Summary"
-                      value="summary"
-                      className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
-                        geneticAnalysisTab === "summary"
-                          ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
-                          : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
-                      }`}
-                      onClick={() => setGeneticAnalysisTab("summary")}
-                    />
-                    <Tab
-                      label="Related Samples"
-                      value="relatedSamples"
-                      className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
-                        geneticAnalysisTab === "detection"
-                          ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
-                          : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
-                      }`}
-                      onClick={() => setGeneticAnalysisTab("relatedSamples")}
-                    />
-                    <Tab
-                      label="Details"
-                      value="details"
-                      className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
-                        geneticAnalysisTab === "details"
-                          ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
-                          : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
-                      }`}
-                      onClick={() => setCurrentTab("details")}
-                    />
-                  </TabList>
-                </TabContext>
-              </div>
+            <div className="flex flex-row">
+              <TabContext value={geneticAnalysisTab}>
+                <TabList className="mt-8" aria-label="Tabs">
+                  <Tab
+                    label="Genetic Summary"
+                    value="summary"
+                    className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
+                      geneticAnalysisTab === "summary"
+                        ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
+                        : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
+                    }`}
+                    onClick={() => setGeneticAnalysisTab("summary")}
+                  />
+                  <Tab
+                    label="Related Samples"
+                    value="relatedSamples"
+                    className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
+                      geneticAnalysisTab === "detection"
+                        ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
+                        : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
+                    }`}
+                    onClick={() => setGeneticAnalysisTab("relatedSamples")}
+                  />
+                  <Tab
+                    label="Details"
+                    value="details"
+                    className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
+                      geneticAnalysisTab === "details"
+                        ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
+                        : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
+                    }`}
+                    onClick={() => console.log("DETAILS")}
+                  />
+                </TabList>
+              </TabContext>
             </div>
           </div>
 
           {/* Genetic Summary Tab */}
           {geneticAnalysisTab === "summary" && (
             <div className="mt-8 dark:text-white">
-              <div className="bg-surface p-4 flex flex-row dark:text-white rounded-sm gap-5 items-center justify-between">
+              <div className="bg-surface p-4 flex flex-row text-white rounded-sm gap-5 items-center justify-between">
                 <div className="flex flex-row gap-2">
                   <h6 className="text-lg font-semibold">
                     d3d867c6722255ebcbc51a11a3a39347
@@ -98,7 +103,7 @@ export default function GeneticAnalysis({ data, relations }) {
                   {data?.tags?.map((tag, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
                     >
                       {tag}
                     </span>
@@ -117,7 +122,7 @@ export default function GeneticAnalysis({ data, relations }) {
                       <div className="flex items-center">
                         <div className="flex flex-col">
                           <div className="relative pt-1">
-                            <div className="text-xs dark:text-gray-600">
+                            <div className="text-base dark:text-gray-600">
                               <a
                                 href="#"
                                 className="cursor-pointer text-red-600 text-lg flex items-center"
@@ -126,7 +131,7 @@ export default function GeneticAnalysis({ data, relations }) {
                                 FickerStealer
                               </a>
                             </div>
-                            <div className="mb-2 text-xs w-48">
+                            <div className="mb-2 text-base w-48">
                               <div className="flex flex-row items-center gap-2">
                                 <span className="text-lg font-semibold">
                                   82%
@@ -136,7 +141,7 @@ export default function GeneticAnalysis({ data, relations }) {
                                 </span>
                               </div>
                             </div>
-                            <div className="mb-2 text-xs">
+                            <div className="mb-2 text-base">
                               <a href="#" className="text-blue-600">
                                 Explore Family
                               </a>
@@ -152,7 +157,7 @@ export default function GeneticAnalysis({ data, relations }) {
                       <div className="flex items-center">
                         <div className="flex flex-col">
                           <div className="relative pt-1">
-                            <div className="text-xs dark:text-gray-600">
+                            <div className="text-base dark:text-gray-600">
                               <a
                                 href="#"
                                 className="cursor-pointer text-gray-600 text-lg flex items-center"
@@ -161,7 +166,7 @@ export default function GeneticAnalysis({ data, relations }) {
                                 Unknown
                               </a>
                             </div>
-                            <div className="mb-2 text-xs w-48">
+                            <div className="mb-2 text-base w-48">
                               <div className="flex flex-row items-center gap-2">
                                 <span className="text-lg font-semibold">
                                   N/A
@@ -171,7 +176,7 @@ export default function GeneticAnalysis({ data, relations }) {
                                 </span>
                               </div>
                             </div>
-                            <div className="mb-2 text-xs">
+                            <div className="mb-2 text-base">
                               <a href="#" className="text-blue-600 underline">
                                 Explore Family
                               </a>
@@ -187,7 +192,7 @@ export default function GeneticAnalysis({ data, relations }) {
                       <div className="flex items-center">
                         <div className="flex flex-col">
                           <div className="relative pt-1">
-                            <div className="text-xs dark:text-gray-600">
+                            <div className="text-base dark:text-gray-600">
                               <a
                                 href="#"
                                 className="cursor-pointer text-green-600 text-lg flex items-center"
@@ -196,7 +201,7 @@ export default function GeneticAnalysis({ data, relations }) {
                                 Google
                               </a>
                             </div>
-                            <div className="mb-2 text-xs w-48">
+                            <div className="mb-2 text-base w-48">
                               <div className="flex flex-row items-center gap-2">
                                 <span className="text-lg font-semibold">
                                   100%
@@ -206,7 +211,7 @@ export default function GeneticAnalysis({ data, relations }) {
                                 </span>
                               </div>
                             </div>
-                            <div className="mb-2 text-xs">
+                            <div className="mb-2 text-base">
                               <a href="#" className="text-blue-600 underline">
                                 Explore Family
                               </a>
@@ -222,7 +227,7 @@ export default function GeneticAnalysis({ data, relations }) {
 
               <div className="mt-8">
                 <h5>Email Metadata</h5>
-                <div className="bg-white shadow dark:bg-surface overflow-hidden sm:rounded-lg">
+                <div className="bg-white shadow dark:bg-surface overflow-hidden sm:rounded-lg text-base">
                   {/* Dummy genetic summary content */}
                   <div className="p-6 dark:text-gray-400">
                     <div className="flex flex-row justify-between">
@@ -247,93 +252,97 @@ export default function GeneticAnalysis({ data, relations }) {
 
           {geneticAnalysisTab === "relatedSamples" && (
             <div className="mt-8">
-              <div className="flex flex-row">
-                {/* Sidebar */}
-                <div className="w-3/12 p-4 border-r border-gray-300 dark:border-gray-700">
-                  <h3 className="dark:text-white text-lg mb-6 font-semibold">
-                    Related IP's ({relations?.reports.equalIPs?.length} IP's)
-                  </h3>
-                  <ul className="space-y-3">
-                    <li
-                      className={`cursor-pointer flex items-center p-3 rounded-md transition duration-300 ${
-                        selectedSample === "ip"
-                          ? "bg-gray-800 text-white hover:bg-gray-800 border-l-indigo-600 border-l-2"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900"
-                      }`}
-                      onClick={() => setSelectedSample("ip")}
-                    >
-                      <span className="text-lg font-semibold">
-                        Related IP's
-                      </span>
-                    </li>
-                    <li
-                      className={`cursor-pointer flex items-center p-3 rounded-md transition duration-300 ${
-                        selectedSample === "verdicts"
-                          ? "bg-gray-800 text-white hover:bg-gray-800 border-l-indigo-600 border-l-2"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900"
-                      }`}
-                      onClick={() => setSelectedSample("verdicts")}
-                    >
-                      <span className="text-lg font-semibold">
-                        Related Verdicts
-                      </span>
-                    </li>
-                  </ul>
-                </div>
+              <div className="dark:text-white">
+                <hr className="dark:border-gray-700" />
+                <h1 className="mb-2 mt-2 font-bold text-[1rem] flex flex-row items-center">
+                  Relative IP Addresses ({relations?.reports?.equalIPs?.length})
+                  <FaQuestionCircle
+                    className="ml-2 text-blue-600 cursor-pointer"
+                    size={14}
+                  />
+                </h1>
+                <hr className="dark:border-gray-700" />
 
-                {/* Selected Family Section */}
-                <div className="flex-grow p-4 bg-white dark:bg-surface rounded-md dark:text-white">
-                  <h3 className="dark:text-white text-2xl mb-6 font-semibold">
-                    {selectedSample === "ip"
-                      ? "Related IP's"
-                      : selectedSample === "verdicts"
-                      ? "Related Verdicts"
-                      : "Select a filter"}
-                  </h3>
+                <div>
+                  <div className="flex flex-row justify-between mt-3 font-semibold dark:text-white">
+                    <div className="w-2/12">
+                      <h5 className="">IP Address</h5>
+                    </div>
+                    <div className="w-2/12">
+                      <h5 className="">Verdict</h5>
+                    </div>
+                    <div className="w-2/12">
+                      <h5 className="">Vendors</h5>
+                    </div>
+                    <div className="w-2/12">
+                      <h5 className="">Tags</h5>
+                    </div>
+                  </div>
 
-                  <ul className="space-y-3">
-                    {selectedSample === "ip" &&
-                      relations?.reports.equalIPs?.map(
-                        (family: IDataOutput, index) => (
-                          <li
-                            key={index}
-                            className={`flex items-center p-3 rounded-md transition duration-300
-                              "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300`}
+                  {relations?.reports?.equalIPs?.map(
+                    (report: IDataOutput, index: number) => (
+                      <div
+                        className="flex flex-row justify-between mt-2"
+                        key={index}
+                      >
+                        <div className="w-2/12">
+                          <a
+                            href={`/report/${report.reportId}`}
+                            className="hover:text-blue-600 text-base"
                           >
-                            {family.verdict === "Threat" && (
-                              <FaBug className="text-red-600 mr-2 text-lg" />
-                            )}
-                            {family.verdict === "Safe" && (
-                              <FaCheckCircle className="text-green-600 mr-2 text-lg" />
-                            )}
-                            <span className="text-lg font-semibold">
-                              {family.metadata.ip}
-                            </span>
-                          </li>
-                        )
-                      )}
-
-                    {selectedSample === "verdicts" &&
-                      relations?.reports.equalIPs?.map(
-                        (family: IDataOutput, index) => (
-                          <li
-                            key={index}
-                            className={`flex items-center p-3 rounded-md transition duration-300
-                              "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300`}
+                            {report.metadata.ip}
+                          </a>
+                        </div>
+                        <div className="w-2/12 text-base">
+                          <span
+                            className={`${
+                              data?.vendors?.filter(
+                                (vendor) => vendor.isThreat === true
+                              ).length > 0 && "text-red-600"
+                            } ${
+                              data?.vendors?.filter(
+                                (vendor) => vendor.isThreat === true
+                              ).length <= 0 && "text-green-500"
+                            }`}
                           >
-                            {family.verdict === "Threat" && (
-                              <FaBug className="text-red-600 mr-2 text-lg" />
-                            )}
-                            {family.verdict === "Safe" && (
-                              <FaCheckCircle className="text-green-600 mr-2 text-lg" />
-                            )}
-                            <span className="text-lg font-semibold">
-                              {family.metadata.ip}
+                            {report.verdict}
+                          </span>
+                        </div>
+                        <div className="w-2/12">
+                          <span className="text-gray-600 text-base">
+                            <span
+                              className={`${
+                                data?.vendors?.filter(
+                                  (vendor) => vendor.isThreat === true
+                                ).length > 0 && "text-red-600"
+                              } ${
+                                data?.vendors?.filter(
+                                  (vendor) => vendor.isThreat === true
+                                ).length <= 0 && "text-green-500"
+                              }`}
+                            >
+                              {
+                                data?.vendors?.filter(
+                                  (vendor) => vendor.isThreat === true
+                                ).length
+                              }
+                            </span>{" "}
+                            / {data.vendors.length}
+                          </span>
+                        </div>
+                        <div className="w-2/12">
+                          {report.tags.map((tag, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center mr-2 px-2.5 py-0.5 rounded-full text-base font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
+                            >
+                              {tag}
                             </span>
-                          </li>
-                        )
-                      )}
-                  </ul>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
             </div>

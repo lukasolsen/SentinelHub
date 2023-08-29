@@ -7,7 +7,7 @@ import GeneticAnalysis from "./components/geneticAnalysis";
 import Tab from "@mui/material/Tab";
 import { TabContext, TabList } from "@mui/lab";
 
-const ReportHeader = ({ vendors }: ResponseData) => (
+const ReportHeader = ({ vendors }: { vendors: IDataOutput }) => (
   <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
     {vendors.length > 0 && (
       <dd className="mt-1 sm:mt-0 sm:col-span-2">
@@ -21,23 +21,11 @@ const ReportHeader = ({ vendors }: ResponseData) => (
   </div>
 );
 
-const TabButton = ({ tabName, currentTab }) => (
-  <Tab
-    className={`w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
-      currentTab === tabName
-        ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
-        : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
-    }`}
-    label={tabName}
-    value={tabName}
-  />
-);
-
 const Report = () => {
   const [currentTab, setCurrentTab] = useState("geneticAnalysis");
 
   const [data, setData] = useState<IDataOutput>();
-  const [relations, setRelations] = useState<[]>([]);
+  const [relations, setRelations] = useState<Relations>();
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
 
@@ -75,7 +63,9 @@ const Report = () => {
             <h2 className="text-sm font-bold text-gray-400">
               Report for <span className="text-blue-500 underline">#{id}</span>
             </h2>
-            <p className="text-xl text-white">Hash: {data?.emailHash}</p>
+            <p className="text-xl dark:text-white text-bodyTextWhite">
+              Hash: {data?.emailHash}
+            </p>
             <div className="flex flex-row items-center mt-2">
               {/* Display all the tags from all vendors */}
               {data?.tags.map((tag, index) => (
@@ -144,47 +134,94 @@ const Report = () => {
                     data.vendors
                       .slice()
                       .sort((a, b) => {
-                        // Sort by threat status first, then by name
                         if (a.isThreat && !b.isThreat) return -1;
                         if (!a.isThreat && b.isThreat) return 1;
                         return a.name.localeCompare(b.name);
                       })
-                      .map((vendor, index) => (
-                        <li
-                          key={index}
-                          className="px-4 py-4 sm:px-6 flex-row flex items-center justify-between"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                              <div className="flex flex-row items-center justify-evenly">
-                                {!vendor.isThreat && (
-                                  <FaCheck className="text-severity-success mr-2" />
-                                )}
+                      .map(
+                        (vendor, index) =>
+                          index % 2 === 0 && (
+                            <li
+                              key={index}
+                              className="px-4 py-4 sm:px-6 flex-row flex justify-between"
+                            >
+                              <div className="flex items-center w-full">
+                                <div className="text-lg leading-6 font-medium text-gray-900 dark:text-white w-1/2">
+                                  <div className="flex flex-row items-center w-full">
+                                    <h3 className="w-10/12">{vendor.name}</h3>
+                                    {!vendor.isThreat && (
+                                      <FaCheck className="text-green-500 ml-2 w-2/12" />
+                                    )}
+                                    {vendor.isThreat && (
+                                      <FaExclamationTriangle className="text-red-600 ml-2" />
+                                    )}
+                                    {/* Display tags if any */}
+                                    {vendor.data?.tags && (
+                                      <div className="sm:flex sm:items-center w-6/12">
+                                        {vendor.data?.tags?.map(
+                                          (tag, index) => (
+                                            <span
+                                              key={index}
+                                              className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
+                                            >
+                                              {tag}
+                                            </span>
+                                          )
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                {data.vendors[index + 1] && (
+                                  <div className="text-lg leading-6 font-medium text-gray-900 dark:text-white w-1/2">
+                                    <div className="flex flex-row items-center w-full">
+                                      <h3 className="w-10/12">
+                                        {data.vendors[index + 1].name}
+                                      </h3>
+                                      {!data.vendors[index + 1].isThreat && (
+                                        <FaCheck className="text-green-500 ml-2 w-2/12" />
+                                      )}
 
-                                {vendor.isThreat && (
-                                  <FaExclamationTriangle className="w-5 h-5 text-red-600 mr-2" />
-                                )}
+                                      {data.vendors[index + 1].isThreat && (
+                                        <FaExclamationTriangle className="text-red-600 ml-2 w-2/12" />
+                                      )}
 
-                                <h3>{vendor.name}</h3>
+                                      {/* Display tags if any */}
+                                      {vendor.data?.tags && (
+                                        <div className="sm:flex sm:items-center w-6/12">
+                                          {vendor.data?.tags?.map(
+                                            (tag, index) => (
+                                              <span
+                                                key={index}
+                                                className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
+                                              >
+                                                {tag}
+                                              </span>
+                                            )
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          </div>
-                          <div className="sm:flex sm:justify-between sm:items-center">
-                            {vendor.data?.tags && (
-                              <div className="sm:flex sm:items-center">
-                                {vendor.data?.tags?.map((tag, index) => (
-                                  <span
-                                    key={index}
-                                    className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
+                              <div className="sm:flex sm:justify-between sm:items-center">
+                                {vendor.data?.tags && (
+                                  <div className="sm:flex sm:items-center">
+                                    {vendor.data?.tags?.map((tag, index) => (
+                                      <span
+                                        key={index}
+                                        className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
+                                      >
+                                        {tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                        </li>
-                      ))}
+                            </li>
+                          )
+                      )}
                 </ul>
               </div>
             </div>
