@@ -3,7 +3,7 @@ import { getEmails } from "../service/api-service";
 import { FaCheck, FaExclamationTriangle } from "react-icons/fa";
 
 export default function Requests() {
-  const [data, setData] = useState<ResponseData[]>([]);
+  const [data, setData] = useState<IDataOutput[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 

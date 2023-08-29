@@ -3,35 +3,17 @@ import { TabContext, TabList } from "@mui/lab";
 import Tab from "@mui/material/Tab";
 import { FaBug, FaCheckCircle, FaQuestionCircle } from "react-icons/fa";
 
-export default function GeneticAnalysis({ data }) {
+type Relations = {
+  reports: {
+    equalIPs: IDataOutput[];
+    equalVerdicts: IDataOutput[];
+  };
+};
+
+export default function GeneticAnalysis({ data, relations }) {
+  console.log(relations?.reports?.equalIPs);
   const [geneticAnalysisTab, setGeneticAnalysisTab] = useState("summary");
-  const relatedFamilies = [
-    {
-      name: "fickerstealer",
-      displayName: "FickerStealer",
-      relatives: [
-        { name: "FickerStealer", type: "Malware", score: 90 },
-        { name: "FickerStealer", type: "Malware", score: 32 },
-      ],
-    },
-    {
-      name: "unknown",
-      displayName: "Unknown",
-      relatives: [
-        { name: "FickerStealer", type: "Malware", score: 82 },
-        { name: "FickerStealer", type: "Malware", score: 32 },
-      ],
-    },
-    {
-      name: "banned",
-      displayName: "Banned",
-      relatives: [
-        { name: "FickerStealer", type: "Malware", score: 82 },
-        { name: "FickerStealer", type: "Malware", score: 32 },
-      ],
-    },
-  ];
-  const [selectedFamily, setSelectedFamily] = useState(relatedFamilies[0]);
+  const [selectedSample, setSelectedSample] = useState("ip");
 
   return (
     <div className="mt-8">
@@ -269,72 +251,89 @@ export default function GeneticAnalysis({ data }) {
                 {/* Sidebar */}
                 <div className="w-3/12 p-4 border-r border-gray-300 dark:border-gray-700">
                   <h3 className="dark:text-white text-lg mb-6 font-semibold">
-                    Related Families ({relatedFamilies.length} genes)
+                    Related IP's ({relations?.reports.equalIPs?.length} IP's)
                   </h3>
                   <ul className="space-y-3">
-                    {relatedFamilies.map((family, index) => (
-                      <li
-                        key={index}
-                        className={`cursor-pointer flex items-center p-3 rounded-md transition duration-300 ${
-                          selectedFamily.name === family.name
-                            ? "bg-gray-800 text-white hover:bg-gray-800 border-l-indigo-600 border-l-2"
-                            : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900"
-                        }`}
-                        onClick={() => setSelectedFamily(family)}
-                      >
-                        <FaBug className="text-red-600 mr-2 text-lg" />
-                        <span className="text-lg font-semibold">
-                          {family.displayName}
-                        </span>
-                      </li>
-                    ))}
+                    <li
+                      className={`cursor-pointer flex items-center p-3 rounded-md transition duration-300 ${
+                        selectedSample === "ip"
+                          ? "bg-gray-800 text-white hover:bg-gray-800 border-l-indigo-600 border-l-2"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900"
+                      }`}
+                      onClick={() => setSelectedSample("ip")}
+                    >
+                      <span className="text-lg font-semibold">
+                        Related IP's
+                      </span>
+                    </li>
+                    <li
+                      className={`cursor-pointer flex items-center p-3 rounded-md transition duration-300 ${
+                        selectedSample === "verdicts"
+                          ? "bg-gray-800 text-white hover:bg-gray-800 border-l-indigo-600 border-l-2"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900"
+                      }`}
+                      onClick={() => setSelectedSample("verdicts")}
+                    >
+                      <span className="text-lg font-semibold">
+                        Related Verdicts
+                      </span>
+                    </li>
                   </ul>
                 </div>
 
                 {/* Selected Family Section */}
                 <div className="flex-grow p-4 bg-white dark:bg-surface rounded-md dark:text-white">
                   <h3 className="dark:text-white text-2xl mb-6 font-semibold">
-                    {selectedFamily.displayName || "Select a Family"}
+                    {selectedSample === "ip"
+                      ? "Related IP's"
+                      : selectedSample === "verdicts"
+                      ? "Related Verdicts"
+                      : "Select a filter"}
                   </h3>
-                  {selectedFamily && (
-                    <div className="mt-2">
-                      <h4 className="text-xl font-semibold mb-4">
-                        {selectedFamily.displayName}
-                      </h4>
-                      <div className="space-y-3">
-                        {selectedFamily.relatives.map((relative, index) => (
-                          <div
+
+                  <ul className="space-y-3">
+                    {selectedSample === "ip" &&
+                      relations?.reports.equalIPs?.map(
+                        (family: IDataOutput, index) => (
+                          <li
                             key={index}
-                            className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-3 rounded-md transition duration-300 hover:bg-gray-200 dark:hover:bg-gray-900"
+                            className={`flex items-center p-3 rounded-md transition duration-300
+                              "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300`}
                           >
+                            {family.verdict === "Threat" && (
+                              <FaBug className="text-red-600 mr-2 text-lg" />
+                            )}
+                            {family.verdict === "Safe" && (
+                              <FaCheckCircle className="text-green-600 mr-2 text-lg" />
+                            )}
                             <span className="text-lg font-semibold">
-                              {relative.name}
+                              {family.metadata.ip}
                             </span>
-                            <div className="flex items-center space-x-2">
-                              <span
-                                className={`text-sm font-medium ${
-                                  relative.score >= 50
-                                    ? "text-red-600"
-                                    : "text-green-600"
-                                }`}
-                              >
-                                {relative.type}
-                              </span>
-                              <span
-                                className={`text-sm font-semibold ${
-                                  relative.score >= 50
-                                    ? "text-red-600"
-                                    : "text-green-600"
-                                }`}
-                              >
-                                {relative.score}%
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                          </li>
+                        )
+                      )}
+
+                    {selectedSample === "verdicts" &&
+                      relations?.reports.equalIPs?.map(
+                        (family: IDataOutput, index) => (
+                          <li
+                            key={index}
+                            className={`flex items-center p-3 rounded-md transition duration-300
+                              "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300`}
+                          >
+                            {family.verdict === "Threat" && (
+                              <FaBug className="text-red-600 mr-2 text-lg" />
+                            )}
+                            {family.verdict === "Safe" && (
+                              <FaCheckCircle className="text-green-600 mr-2 text-lg" />
+                            )}
+                            <span className="text-lg font-semibold">
+                              {family.metadata.ip}
+                            </span>
+                          </li>
+                        )
+                      )}
+                  </ul>
                 </div>
               </div>
             </div>

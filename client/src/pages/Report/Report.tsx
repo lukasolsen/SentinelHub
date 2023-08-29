@@ -37,6 +37,7 @@ const Report = () => {
   const [currentTab, setCurrentTab] = useState("geneticAnalysis");
 
   const [data, setData] = useState<IDataOutput>();
+  const [relations, setRelations] = useState<[]>([]);
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
 
@@ -50,8 +51,10 @@ const Report = () => {
   }, [id]);
 
   useEffect(() => {
+    if (!data) return;
     getRelatedReports(data?.metadata?.ip, data?.reportId, data?.verdict).then(
       (data) => {
+        setRelations(data);
         console.log(data);
       }
     );
@@ -126,7 +129,9 @@ const Report = () => {
           </TabContext>
 
           {/* Genetic Analysis Tab */}
-          {currentTab === "geneticAnalysis" && <GeneticAnalysis data={data} />}
+          {currentTab === "geneticAnalysis" && (
+            <GeneticAnalysis data={data} relations={relations} />
+          )}
           {/* Detection Tab */}
           {currentTab === "detection" && (
             <div className="mt-8">
@@ -216,10 +221,35 @@ const Report = () => {
 
       {loading && (
         <div className="flex flex-col items-center justify-center">
-          <h1 className="text-2xl font-bold mb-4 dark:text-white">
-            Email Report
-          </h1>
-          <h2 className="text-xl font-bold mb-4 dark:text-white">Loading...</h2>
+          <h1 className="text-2xl font-bold dark:text-white">Loading...</h1>
+          <p className="dark:text-gray-400 mb-4">
+            Make sure you have the correct report ID.
+          </p>
+          <h2 className="text-xl font-bold mb-4 dark:text-white">
+            <div
+              className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] text-primary motion-reduce:animate-[spin_1.5s_linear_infinite]"
+              role="status"
+            >
+              <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+                Loading...
+              </span>
+            </div>
+          </h2>
+
+          <div className="flex flex-row">
+            <a
+              className="bg-card hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded mr-2 h-36 w-36 shadow-sm cursor-pointer"
+              href="/"
+            >
+              Home
+            </a>
+            <a
+              className="bg-card hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded mr-2 h-36 w-36 shadow-sm cursor-pointer"
+              href="/"
+            >
+              Database
+            </a>
+          </div>
         </div>
       )}
     </div>
