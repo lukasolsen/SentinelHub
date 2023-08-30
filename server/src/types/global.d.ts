@@ -1,31 +1,47 @@
-type Data = {
-  attachments: string[];
-  date: string;
-  from: FromType;
-  headerLines: HeaderLine[];
-  headers: HeadersT;
+interface Attachment {
+  fileName: string;
+  contentType: string;
+  content: Buffer; // Replace with the appropriate type for attachment content
+}
+
+interface EmailHeader {
+  key: string;
+  line: string;
+  value: string;
+}
+
+interface EmailHeaders {
   html: string;
   messageId: string;
   subject: string;
-  to: FromType;
-};
-
-interface IDataOutput {
-  data: Data;
-  emailHash: string;
-  metadata: IMetadata;
-  reportId: number;
-  tags: string[];
-  verdict: string;
-  timestamp: string;
-  vendors: VendorOutput[];
-  country: {
-    name: string;
-    code: number;
-  };
+  text: string;
+  textAsHtml: string;
 }
 
-interface IMetadata {
+interface EmailAddress {
+  address: string;
+  name: string;
+}
+
+interface EmailContact {
+  value: EmailAddress;
+  html: string;
+  text: string;
+}
+
+interface EmailData {
+  attachments: Attachment[];
+  date: string;
+  from: EmailContact;
+  to: EmailContact;
+  headerLines: EmailHeader[];
+  headers: EmailHeaders;
+  html: string;
+  messageId: string;
+  subject: string;
+}
+
+interface EmailMetadata {
   date: string;
   from: string;
   to?: string;
@@ -36,44 +52,52 @@ interface IMetadata {
   sha256: string;
 }
 
-interface VendorOutput {
+interface VendorData {
+  tags?: string[];
+}
+
+interface VendorCountry {
+  name: string;
+  code: number;
+}
+
+interface Vendor {
   name: string;
   url: string;
   isThreat: boolean;
   tags: string[];
   data?: VendorData;
-  country?: {
-    name: string;
-    code: number;
-    icon_url: string;
-  };
+  country?: VendorCountry;
 }
 
-type VendorData = {
-  tags?: string[];
-};
+interface EmailReport {
+  data: EmailData;
+  emailHash: string;
+  metadata: EmailMetadata;
+  reportId: number;
+  tags: string[];
+  verdict: string;
+  timestamp: string;
+  vendors: Vendor[];
+  country: VendorCountry;
+}
 
-type HeadersT = {
-  html: string;
-  messageId: string;
-  subject: string;
-  text: string;
-  textAsHtml: string;
-};
+interface RelatedReports {
+  equalIPs: EmailReport[];
+  equalVerdicts: EmailReport[];
+}
 
-type HeaderLine = {
-  key: string;
-  line: string;
-  value: string;
-};
-
-type FromType = {
-  value: FromValueTypew;
-  html: string;
-  text: string;
-};
-
-type FromValueTypew = {
-  address: string;
-  name: string;
+export {
+  Attachment,
+  EmailHeader,
+  EmailHeaders,
+  EmailAddress,
+  EmailContact,
+  EmailData,
+  EmailMetadata,
+  VendorData,
+  VendorCountry,
+  Vendor,
+  EmailReport,
+  RelatedReports,
 };

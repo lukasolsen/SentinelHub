@@ -6,12 +6,10 @@ import {
 
 type IPResponse = {
   verdict: string;
-  size: number;
   tags: string[];
   country: {
     code: number;
     name: string;
-    icon_url: string;
   };
   vendors: Vendors[];
 };
@@ -25,71 +23,56 @@ type Vendors = {
   country?: {
     name: string;
     code: number;
-    icon_url: string;
+  };
+};
+
+const getVendorData = async (
+  vendor: any, // Replace 'any' with the specific vendor type
+  ip: string
+): Promise<Vendors> => {
+  const data = await vendor.getInstance().getData(ip);
+  return {
+    name: vendor.name,
+    url: data.url,
+    isThreat: data.isThreat,
+    tags: data.tags,
+    data: data.data,
+    country: {
+      name: data.country.name,
+      code: data.country.code,
+    },
   };
 };
 
 export const CheckIP = async (ip: string): Promise<IPResponse> => {
-  const FeodotrackerAbuseCHData = await FeodotrackerAbuseCH.getInstance()
-    .getData(ip)
-    .then((data) => {
-      return data;
-    });
-
-  const StrictBlockPAlleboneBlockIPData =
-    await StrictBlockPAlleboneBlockIP.getInstance()
-      .getData(ip)
-      .then((data) => {
-        return data;
-      });
-
-  const AlienVaultData = await AlienVault.getInstance()
-    .getIPData(ip)
-    .then((data) => {
-      return data;
-    });
-
-  //For the isThreat, we need to check if any of the vendors have isThreat = true
-
-  const isThreat =
-    FeodotrackerAbuseCHData.isThreat ||
-    StrictBlockPAlleboneBlockIPData.isThreat ||
-    AlienVaultData.isThreat;
-
-  const vendors = [
-    {
-      name: "Feodotracker Abuse CH",
-      url: "https://feodotracker.abuse.ch/blocklist/",
-      isThreat: FeodotrackerAbuseCHData.isThreat,
-      tags: FeodotrackerAbuseCHData.tags,
-      data: FeodotrackerAbuseCHData.data,
-    },
-    {
-      name: "Strict BlockP Allebone Block IP",
-      url: StrictBlockPAlleboneBlockIPData.url,
-      isThreat: StrictBlockPAlleboneBlockIPData.isThreat,
-      tags: StrictBlockPAlleboneBlockIPData.tags,
-      data: StrictBlockPAlleboneBlockIPData.data,
-    },
-    {
-      name: "AlienVault",
-      url: AlienVaultData.url,
-      isThreat: AlienVaultData.isThreat,
-      tags: AlienVaultData.tags,
-      data: AlienVaultData.data,
-    },
+  const vendorList = [
+    FeodotrackerAbuseCH,
+    StrictBlockPAlleboneBlockIP,
+    AlienVault,
   ];
 
-  const tagsArray = vendors.map((vendor) => vendor.tags);
+  const vendorsData = await Promise.all(
+    vendorList.map((vendor) => getVendorData(vendor, ip))
+  );
 
+  const isThreat = vendorsData.some((vendor) => vendor.isThreat);
+  console.log("isThreat ->", isThreat);
+
+  const tagsArray = vendorsData.flatMap((vendor) => vendor.tags);
+  console.log("tagsArray ->", tagsArray);
+
+  console.log("isThreat ->", isThreat, "\n");
+  console.log("tagsArray ->", tagsArray, "\n");
+  console.log("vendorsData ->", vendorsData, "\n");
+  console.log("country ->", vendorsData[2].country.code, "\n");
+  console.log("ip ->", ip, "\n");
   return {
     verdict: isThreat ? "Threat" : "Safe",
-    size: 123,
-    tags: tagsArray.flat(),
-    vendors,
+    tags: tagsArray,
+    vendors: vendorsData,
     country: {
-      code: AlienVaultData.country.code,
-      name: AlienVaultData.country.name,
+      code: vendorsData[2].country.code,
+      name: vendorsData[2].country.name,
     },
   };
 };

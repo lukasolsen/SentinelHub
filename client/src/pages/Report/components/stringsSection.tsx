@@ -1,22 +1,37 @@
 import React, { useState } from "react";
 
-function StringsSection() {
+function StringsSection({
+  families,
+  stringData,
+}: {
+  families: string[];
+  stringData: string[];
+}) {
   const [selectedFilters, setSelectedFilters] = useState([]);
+  /*const families = [
+    "Malware",
+    "Phishing",
+    "Social Engineering",
+    "Spam",
+    "Suspicious",
+    "Unknown",
+    "Other",
+  ];*/
   const stringsData = [
     {
-      string: "String Name",
-      tags: ["IPS"],
+      string:
+        ".?AU?$_PPLTaskHandle@EU?$_InitialTaskHandle@XV<lambda_7a66c1da0ea0e694bfc05d79bffbd28e>@@U_TypeSelectorNoAsync@details@Concurrency@@@?$task@E@Concurrency@@U_TaskProcHandle@details@3@@details@Concurrency@@",
+      family: families,
+      tags: ["path"],
     },
     // Add more data as needed...
   ];
 
-  const tags = ["IPS", "Websites"]; // Add more categories as needed
-
-  const handleFilterChange = (tag) => {
-    if (selectedFilters.includes(tag)) {
-      setSelectedFilters(selectedFilters.filter((filter) => filter !== tag));
+  const handleFilterChange = (family: string) => {
+    if (selectedFilters.includes(family)) {
+      setSelectedFilters(selectedFilters.filter((filter) => filter !== family));
     } else {
-      setSelectedFilters([...selectedFilters, tag]);
+      setSelectedFilters([...selectedFilters, family]);
     }
   };
 
@@ -24,7 +39,7 @@ function StringsSection() {
     if (selectedFilters.length === 0) {
       return true;
     }
-    return selectedFilters.some((filter) => string.tags.includes(filter));
+    return selectedFilters.some((filter) => string.family === filter);
   });
 
   return (
@@ -34,16 +49,16 @@ function StringsSection() {
         <div className="w-1/4 px-4">
           <h2 className="text-xl font-bold mb-4 dark:text-white">Filter By:</h2>
           <ul>
-            {tags.map((tag) => (
-              <li key={tag} className="mb-2">
+            {families.map((family) => (
+              <li key={family} className="mb-2">
                 <label className="flex items-center space-x-2 dark:text-white">
                   <input
                     type="checkbox"
-                    checked={selectedFilters.includes(tag)}
-                    onChange={() => handleFilterChange(tag)}
+                    checked={selectedFilters.includes(family)}
+                    onChange={() => handleFilterChange(family)}
                     className="rounded-sm text-blue-500 dark:bg-gray-800 focus:outline-none focus-visible:outline-none focus:ring-transparent"
                   />
-                  <span>{tag}</span>
+                  <span>{family}</span>
                 </label>
               </li>
             ))}
@@ -63,6 +78,10 @@ function StringsSection() {
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                     {string.string}
                   </h3>
+
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Family: {string.family}
+                  </span>
                   <span className="text-sm text-gray-500 dark:text-gray-400">
                     Tags: {string.tags.join(", ")}
                   </span>

@@ -156,6 +156,10 @@ export class FeodotrackerAbuseCH {
       tags: threatData.tags,
       isThreat: isThreat,
       data: threatData,
+      country: {
+        name: "Unknown",
+        code: 0,
+      },
     };
   }
 }
@@ -197,6 +201,10 @@ export class StrictBlockPAlleboneBlockIP {
       url: "https://github.com/pallebone/StrictBlockPAllebone",
       tags: [],
       isThreat: isThreat,
+      country: {
+        name: "Unknown",
+        code: 0,
+      },
     };
   }
 }
@@ -220,13 +228,12 @@ export class AlienVault {
     return AlienVault.instance;
   }
 
-  async getIPData(ip: string): Promise<VendorOutput> {
+  async getData(ip: string): Promise<VendorOutput> {
     if (this.data.length === 0) {
       const dataPromises = this.urls.map((url) =>
         getData(url + ip + "/general")
       );
       const dataArray = await Promise.all(dataPromises);
-      console.log(dataArray);
 
       // for now just return the things we get.
       this.data = dataArray.reduce((acc, data) => {
