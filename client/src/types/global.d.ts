@@ -19,6 +19,11 @@ interface IDataOutput {
   verdict: string;
   timestamp: string;
   vendors: VendorOutput[];
+  country: {
+    name: string;
+    code: string;
+    icon_url: string;
+  };
 }
 
 interface IMetadata {

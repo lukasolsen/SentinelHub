@@ -19,6 +19,10 @@ interface IDataOutput {
   verdict: string;
   timestamp: string;
   vendors: VendorOutput[];
+  country: {
+    name: string;
+    code: number;
+  };
 }
 
 interface IMetadata {
@@ -38,6 +42,11 @@ interface VendorOutput {
   isThreat: boolean;
   tags: string[];
   data?: VendorData;
+  country?: {
+    name: string;
+    code: number;
+    icon_url: string;
+  };
 }
 
 type VendorData = {

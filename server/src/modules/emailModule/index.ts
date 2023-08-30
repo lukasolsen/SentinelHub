@@ -50,6 +50,10 @@ export const addBadEmail = async (req: Request, res: Response) => {
 
         vendors: data.vendors,
         verdict: data.verdict,
+        country: {
+          code: data.country.code,
+          name: data.country.name,
+        },
       });
 
       res.send({ status: "ok", id: badEmails[badEmails.length - 1].reportId });

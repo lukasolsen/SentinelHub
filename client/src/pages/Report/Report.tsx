@@ -33,7 +33,12 @@ const Report = () => {
     if (!id) return;
     getEmail(id).then((data: IDataOutput) => {
       if (!data.error) setLoading(false);
+      // Make it so that all the vendors will show the threat first, then the safe ones
+      console.log(data);
+      data.vendors.sort((a, b) => (a.isThreat && !b.isThreat ? -1 : 1));
+
       setData(data);
+
       console.log(data);
     });
   }, [id]);
@@ -133,11 +138,7 @@ const Report = () => {
                   {data.vendors &&
                     data.vendors
                       .slice()
-                      .sort((a, b) => {
-                        if (a.isThreat && !b.isThreat) return -1;
-                        if (!a.isThreat && b.isThreat) return 1;
-                        return a.name.localeCompare(b.name);
-                      })
+                      .sort((a, b) => (a.isThreat && !b.isThreat ? -1 : 1))
                       .map(
                         (vendor, index) =>
                           index % 2 === 0 && (

@@ -43,6 +43,61 @@ interface IpAPIResp {
   org: string;
 }
 
+interface AlienVaultResp {
+  whois: string;
+  reputation: number;
+  indicator: string;
+  type: string;
+  type_title: string;
+  base_indicator: {};
+  pulse_info: {
+    count: number;
+    pulses: [];
+    references: [];
+    related: {
+      alientvault: {
+        adversary: [];
+        malware_families: [];
+        industries: [];
+      };
+      other: {
+        adversary: [];
+        malware_families: [];
+        industries: [];
+      };
+    };
+  };
+  false_positive: [];
+  validation: [];
+  asn: string;
+  city_data: boolean;
+  city: string;
+  continent_code: string;
+  country_code3: string;
+  country_code2: string;
+  subdivision: string;
+  latitude: number;
+  postal_code: string;
+  longitude: number;
+  accuracy_radius: number;
+  country_code: number;
+  country_name: string;
+  dma_code: number;
+  area_code: number;
+  flag_url: string;
+  flag_title: string;
+  sections: [
+    "general",
+    "geo",
+    "reputation",
+    "url_list",
+    "passive_dns",
+    "malware",
+    "nids_list",
+    "http_scans"
+  ];
+}
+
 //feodotracker abuse ch
 
 export class FeodotrackerAbuseCH {
@@ -142,6 +197,67 @@ export class StrictBlockPAlleboneBlockIP {
       url: "https://github.com/pallebone/StrictBlockPAllebone",
       tags: [],
       isThreat: isThreat,
+    };
+  }
+}
+
+export class AlienVault {
+  urls: string[];
+  data: AlienVaultResp[];
+  asset_link: string;
+  static instance: AlienVault;
+
+  constructor() {
+    this.urls = ["https://otx.alienvault.com/api/v1/indicators/IPv4/"];
+    this.asset_link = "https://otx.alienvault.com";
+    this.data = [];
+  }
+
+  static getInstance() {
+    if (!AlienVault.instance) {
+      AlienVault.instance = new AlienVault();
+    }
+    return AlienVault.instance;
+  }
+
+  async getIPData(ip: string): Promise<VendorOutput> {
+    if (this.data.length === 0) {
+      const dataPromises = this.urls.map((url) =>
+        getData(url + ip + "/general")
+      );
+      const dataArray = await Promise.all(dataPromises);
+      console.log(dataArray);
+
+      // for now just return the things we get.
+      this.data = dataArray.reduce((acc, data) => {
+        acc.push(data);
+        return acc;
+      }, []);
+
+      console.log("AlienVault data fetched");
+    } else {
+      console.log("AlienVault data already fetched");
+    }
+
+    const isThreat = this.data.some((item) => item.reputation < 0);
+    const threatData = {
+      tags: this.data
+        .filter((item) => item.reputation < 0)
+        .map((item) => item.type_title),
+    };
+
+    return {
+      name: "AlienVault",
+      url: "https://otx.alienvault.com/",
+      tags: threatData.tags,
+      isThreat: isThreat,
+      data: threatData,
+      country: {
+        name: this.data.find((item) => item.country_name.length > 0)
+          .country_name,
+        code: this.data.find((item) => item.country_name.length > 0)
+          .country_code,
+      },
     };
   }
 }

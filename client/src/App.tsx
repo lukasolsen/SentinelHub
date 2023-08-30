@@ -48,21 +48,21 @@ function App() {
             Why Use Sentinel Hub?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-card p-6 rounded-lg shadow-lg">
-              <h3 className="text-lg md:text-xl font-semibold mb-3 text-gray-200">
+            <div className="dark:bg-card p-6 rounded-lg shadow-lg">
+              <h3 className="text-lg md:text-xl font-semibold mb-3 dark:text-gray-200 text-bodyTextWhite">
                 Comprehensive Protection
               </h3>
-              <p className="text-gray-300">
+              <p className="dark:text-gray-300 text-bodyTextWhite">
                 Our advanced tools and strategies offer comprehensive protection
                 against the latest cyber threats. Safeguard your digital assets
                 with confidence.
               </p>
             </div>
-            <div className="bg-card p-6 rounded-lg shadow-lg">
-              <h3 className="text-lg md:text-xl font-semibold mb-3 text-gray-200">
+            <div className="dark:bg-card p-6 rounded-lg shadow-lg">
+              <h3 className="text-lg md:text-xl font-semibold mb-3 dark:text-gray-200 text-bodyTextWhite">
                 Expert Insights
               </h3>
-              <p className="text-gray-300">
+              <p className="dark:text-gray-300 text-bodyTextWhite">
                 Gain access to expert insights and analyses from the
                 cybersecurity industry. Stay informed about emerging threats and
                 best practices.
