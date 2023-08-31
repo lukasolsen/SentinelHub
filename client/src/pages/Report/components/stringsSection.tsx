@@ -1,31 +1,16 @@
 import React, { useState } from "react";
 
 function StringsSection({
-  families,
-  stringData,
+  strings,
 }: {
-  families: string[];
-  stringData: string[];
+  strings: { [key: string]: { family: string; tags: string[] } };
 }) {
   const [selectedFilters, setSelectedFilters] = useState([]);
-  /*const families = [
-    "Malware",
-    "Phishing",
-    "Social Engineering",
-    "Spam",
-    "Suspicious",
-    "Unknown",
-    "Other",
-  ];*/
-  const stringsData = [
-    {
-      string:
-        ".?AU?$_PPLTaskHandle@EU?$_InitialTaskHandle@XV<lambda_7a66c1da0ea0e694bfc05d79bffbd28e>@@U_TypeSelectorNoAsync@details@Concurrency@@@?$task@E@Concurrency@@U_TaskProcHandle@details@3@@details@Concurrency@@",
-      family: families,
-      tags: ["path"],
-    },
-    // Add more data as needed...
-  ];
+
+  // Get all the families, but remove empty ones
+  const families = Object.keys(strings).filter(
+    (family) => strings[family].length > 0
+  );
 
   const handleFilterChange = (family: string) => {
     if (selectedFilters.includes(family)) {
@@ -35,11 +20,11 @@ function StringsSection({
     }
   };
 
-  const filteredStrings = stringsData.filter((string) => {
+  const filteredStrings = families.filter((family) => {
     if (selectedFilters.length === 0) {
       return true;
     }
-    return selectedFilters.some((filter) => string.family === filter);
+    return selectedFilters.some((filter) => family === filter);
   });
 
   return (
@@ -49,6 +34,17 @@ function StringsSection({
         <div className="w-1/4 px-4">
           <h2 className="text-xl font-bold mb-4 dark:text-white">Filter By:</h2>
           <ul>
+            <li className="mb-2">
+              <label className="flex items-center space-x-2 dark:text-white">
+                <input
+                  type="checkbox"
+                  checked={selectedFilters.length === 0}
+                  onChange={() => setSelectedFilters([])}
+                  className="rounded-sm text-blue-500 dark:bg-gray-800 focus:outline-none focus-visible:outline-none focus:ring-transparent"
+                />
+                <span>All</span>
+              </label>
+            </li>
             {families.map((family) => (
               <li key={family} className="mb-2">
                 <label className="flex items-center space-x-2 dark:text-white">
@@ -58,7 +54,9 @@ function StringsSection({
                     onChange={() => handleFilterChange(family)}
                     className="rounded-sm text-blue-500 dark:bg-gray-800 focus:outline-none focus-visible:outline-none focus:ring-transparent"
                   />
-                  <span>{family}</span>
+                  <span>
+                    {family} ({strings[family].length})
+                  </span>
                 </label>
               </li>
             ))}
@@ -68,25 +66,31 @@ function StringsSection({
         {/* Display Filtered Strings */}
         <div className="w-3/4">
           <ul className="divide-y divide-gray-300 dark:divide-gray-700">
-            {filteredStrings.map((string, index) => (
-              <li
-                key={index}
-                className="px-4 py-4 sm:px-6 bg-white dark:bg-gray-800"
-              >
-                {/* Display string details */}
-                <div className="flex flex-row items-center space-x-4">
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    {string.string}
-                  </h3>
-
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Family: {string.family}
-                  </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Tags: {string.tags.join(", ")}
-                  </span>
-                  {/* Display other details of the string */}
-                </div>
+            {filteredStrings.map((family) => (
+              <li key={family} className="px-4 py-4 sm:px-6">
+                {/* Display strings of this family */}
+                <ul className="gap-2">
+                  {strings[family].map((string, index) => (
+                    <li
+                      key={index}
+                      className="text-sm text-gray-500 dark:text-gray-400"
+                    >
+                      <div className="flex flex-row items-center">
+                        <h6>{string}</h6>
+                        <div className="flex flex-row items-center ml-2">
+                          {strings[family].tags.map((tag, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 text-xs font-bold text-white bg-blue-500 rounded-full mr-2"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                      </div>
+                      <hr className="my-2" />
+                    </li>
+                  ))}
+                </ul>
               </li>
             ))}
           </ul>

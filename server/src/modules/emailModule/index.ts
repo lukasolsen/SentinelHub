@@ -8,6 +8,7 @@ import {
   IPV4_REGEX,
   IPV6_REGEX,
   URL_REGEX,
+  UUID_REGEX,
   extractFromText,
 } from "../../utils/stringExtractor";
 
@@ -131,26 +132,108 @@ export const getRelatedReports = (req: Request, res: Response) => {
 };
 
 type TStrings = {
-  ipv4: string[];
-  ipv6: string[];
-  email: string[];
-  urls: string[];
-  paths: string[];
-  addresses: string[];
+  ipv4: {
+    tags: string[];
+    strings: string[];
+  };
+  ipv6: {
+    tags: string[];
+    strings: string[];
+  };
+  email: {
+    tags: string[];
+    strings: string[];
+  };
+  urls: {
+    tags: string[];
+    strings: string[];
+  };
+  paths: {
+    tags: string[];
+    strings: string[];
+  };
+  addresses: {
+    tags: string[];
+    strings: string[];
+  };
+  uuid: {
+    tags: string[];
+    strings: string[];
+  };
 };
 
-export const extractStrings = (email: ParsedMail): TStrings => {
+type TFamily = {
+  name: string;
+  display_name?: string;
+  color: string;
+};
+
+type TStringsOutput = {
+  families: TFamily;
+  strings: TStrings;
+};
+
+export const extractStrings = (email: ParsedMail): TStringsOutput => {
   const ipv4 = extractFromText(email.html, IPV4_REGEX);
   const ipv6 = extractFromText(email.html, IPV6_REGEX);
   const emailAddresses = extractFromText(email.html, EMAIL_REGEX);
   const url = extractFromText(email.html, URL_REGEX);
+  const uuid = extractFromText(email.html, UUID_REGEX);
 
-  return {
-    ipv4,
-    ipv6,
-    email: emailAddresses,
-    urls: url,
-    paths: [],
-    addresses: [],
+  const output: TStringsOutput = {
+    families: [
+      {
+        name: "ip",
+        display_name: "IP",
+        color: "#f44336",
+      },
+      {
+        name: "email",
+        display_name: "Email",
+        color: "#e91e63",
+      },
+      {
+        name: "url",
+        display_name: "URL",
+        color: "#9c27b0",
+      },
+      {
+        name: "uuid",
+        display_name: "UUID",
+        color: "#673ab7",
+      },
+    ],
+    strings: {
+      ipv4: {
+        tags: ["IP"],
+        strings: ipv4,
+      },
+      ipv6: {
+        tags: ["IP"],
+        strings: ipv6,
+      },
+      email: {
+        tags: ["Email"],
+        strings: emailAddresses,
+      },
+      urls: {
+        tags: ["URL"],
+        strings: url,
+      },
+      paths: {
+        tags: [],
+        strings: [],
+      },
+      addresses: {
+        tags: [],
+        strings: [],
+      },
+      uuid: {
+        tags: ["UUID"],
+        strings: uuid,
+      },
+    },
   };
+
+  return output;
 };

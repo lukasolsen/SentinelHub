@@ -26,3 +26,6 @@ export const EMAIL_REGEX =
   /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gim;
 export const EMAIL_REGEX_STRICT =
   /(?<!\w)([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)(?!\w)/gim;
+export const UUID_REGEX = /(?:[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}?)/gim;
+export const UUID_REGEX_STRICT =
+  /(?<!\w)(?:[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}?)(?!\w)/gim;

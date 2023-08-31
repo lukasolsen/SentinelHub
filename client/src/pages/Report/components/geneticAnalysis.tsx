@@ -29,7 +29,7 @@ export default function GeneticAnalysis({
   return (
     <div className="mt-8">
       <div className="flex flex-row justify-between gap-6">
-        <div className="w-4/12 h-3/6">
+        <div className="w-2/12 h-3/6">
           <h2 className="dark:text-white text-xl">Attachments</h2>
           {data?.data.attachments?.map((attachment, index) => (
             <div
@@ -49,7 +49,7 @@ export default function GeneticAnalysis({
           )}
         </div>
 
-        <div className="w-8/12">
+        <div className="w-10/12">
           {/* Tabs */}
           <div className="relative">
             <div className="flex flex-row">
@@ -387,7 +387,9 @@ export default function GeneticAnalysis({
             </div>
           )}
 
-          {geneticAnalysisTab === "strings" && <StringsSection />}
+          {geneticAnalysisTab === "strings" && (
+            <StringsSection strings={data.strings} />
+          )}
         </div>
       </div>
     </div>

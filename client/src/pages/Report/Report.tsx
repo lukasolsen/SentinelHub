@@ -154,7 +154,7 @@ const Report = () => {
                                       <FaCheck className="text-green-500 ml-2 w-2/12" />
                                     )}
                                     {vendor.isThreat && (
-                                      <FaExclamationTriangle className="text-red-600 ml-2" />
+                                      <FaExclamationTriangle className="text-red-600 ml-2 w-2/12" />
                                     )}
                                     {/* Display tags if any */}
                                     {vendor.data?.tags && (
@@ -188,18 +188,18 @@ const Report = () => {
                                       )}
 
                                       {/* Display tags if any */}
-                                      {vendor.data?.tags && (
+                                      {data.vendors[index + 1].data?.tags && (
                                         <div className="sm:flex sm:items-center w-6/12">
-                                          {vendor.data?.tags?.map(
-                                            (tag, index) => (
-                                              <span
-                                                key={index}
-                                                className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
-                                              >
-                                                {tag}
-                                              </span>
-                                            )
-                                          )}
+                                          {data.vendors[
+                                            index + 1
+                                          ].data?.tags?.map((tag, index) => (
+                                            <span
+                                              key={index}
+                                              className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-gray-800 dark:text-gray-400"
+                                            >
+                                              {tag}
+                                            </span>
+                                          ))}
                                         </div>
                                       )}
                                     </div>
