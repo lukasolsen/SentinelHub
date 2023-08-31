@@ -68,7 +68,7 @@ export const MUITheme = () =>
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={MUITheme}>
     <TThemeProvider>
-      <div className="dark:bg-background bg-slate-100 overscroll-auto h-full min-h-screen">
+      <div className="dark:bg-background bg-slate-100 overscroll-auto h-full min-h-screen break-all">
         <Navbar />
         <RouterProvider router={router} />
       </div>

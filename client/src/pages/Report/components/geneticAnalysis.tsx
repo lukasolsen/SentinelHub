@@ -52,7 +52,7 @@ export default function GeneticAnalysis({
         <div className="w-10/12">
           {/* Tabs */}
           <div className="relative">
-            <div className="flex flex-row">
+            <div className="flex flex-row items-center">
               <TabContext value={geneticAnalysisTab}>
                 <TabList className="mt-8" aria-label="Tabs">
                   <Tab
@@ -76,7 +76,7 @@ export default function GeneticAnalysis({
                     onClick={() => setGeneticAnalysisTab("relatedSamples")}
                   />
                   <Tab
-                    label="Strings"
+                    label={`Strings`}
                     value="strings"
                     className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
                       geneticAnalysisTab === "strings"

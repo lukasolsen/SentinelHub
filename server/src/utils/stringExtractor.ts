@@ -1,6 +1,14 @@
-export const extractFromText = (html: string, regex: RegExp): string[] => {
-  const matches = html.match(regex);
-  return matches || [];
+export const extractFromText = (html: string, regexes: RegExp[]): string[] => {
+  const extractedStrings: string[] = [];
+
+  for (const regex of regexes) {
+    const matches = html.match(regex);
+    if (matches) {
+      extractedStrings.push(...matches);
+    }
+  }
+
+  return extractedStrings;
 };
 
 export const extractFromURL = (url: string, regex: RegExp): string => {

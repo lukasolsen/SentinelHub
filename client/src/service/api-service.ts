@@ -58,7 +58,7 @@ const makePostRequest = async <T>(
 export const sendEmailContent = async (
   emailContent: string
 ): Promise<ErrorResponse | VendorOutput> => {
-  const api = "http://localhost:1200/api/parse-email";
+  const api = "http://localhost:1200/api/parse/email";
 
   const queryParams = {
     emailContent,
@@ -70,7 +70,7 @@ export const sendEmailContent = async (
 export const addEmailContent = async (
   emailContent: string
 ): Promise<ErrorResponse | VendorOutput> => {
-  const api = "http://localhost:1200/api/add-bad-email";
+  const api = "http://localhost:1200/api/email/add-bad-email";
 
   const queryParams = {
     emailContent,
@@ -80,15 +80,15 @@ export const addEmailContent = async (
 };
 
 export const getEmails = async (): Promise<ErrorResponse | VendorOutput[]> => {
-  const api = "http://localhost:1200/api/bad-emails";
+  const api = "http://localhost:1200/api/email/bad-emails";
 
-  return makePostRequest<VendorOutput[]>(api);
+  return makeGetRequest<VendorOutput[]>(api);
 };
 
 export const getEmail = async (
   id: string
 ): Promise<ErrorResponse | IDataOutput> => {
-  const api = `http://localhost:1200/api/bad-email/${id}`;
+  const api = `http://localhost:1200/api/email/bad-email/${id}`;
 
   return makeGetRequest<IDataOutput>(api);
 };
@@ -99,7 +99,7 @@ export const getRelatedReports = async (
   verdict: string
 ): Promise<ErrorResponse | VendorOutput[]> => {
   console.log(ip, id, verdict);
-  const api = `http://localhost:1200/api/related-reports`;
+  const api = `http://localhost:1200/api/email/related-reports`;
   //Make the things in body
   const queryParams = {
     ip,
@@ -107,5 +107,5 @@ export const getRelatedReports = async (
     verdict,
   };
 
-  return makePostRequest<VendorOutput[]>(api, queryParams);
+  return makeGetRequest<VendorOutput[]>(api, queryParams);
 };

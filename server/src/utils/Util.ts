@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { simpleParser } from "mailparser";
 
 export const generateHash = (email: string) => {
   const hash = crypto.createHash("sha256");
@@ -29,3 +30,14 @@ export const Categories = [
   "Unknown",
   "Not Supported",
 ] as const;
+
+export const getEmailContent = async (
+  emailContent: string
+): Promise<ParsedMail> => {
+  try {
+    return await simpleParser(emailContent);
+  } catch (error) {
+    console.error("Error parsing email:", error);
+    throw new Error("Internal Server Error");
+  }
+};

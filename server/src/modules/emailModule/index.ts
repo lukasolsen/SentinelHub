@@ -1,6 +1,6 @@
 import { ParsedMail, simpleParser } from "mailparser";
 import { Response, Request } from "express";
-import { generateHash, generateMD5 } from "../../utils/Util";
+import { generateHash, generateMD5, getEmailContent } from "../../utils/Util";
 import { CheckIP } from "../../service/protection-service";
 import { Vendor } from "../../types/global";
 import {
@@ -13,15 +13,6 @@ import {
 } from "../../utils/stringExtractor";
 
 const badEmails: IDataOutput[] = [];
-
-const getEmailContent = async (emailContent: string): Promise<ParsedMail> => {
-  try {
-    return await simpleParser(emailContent);
-  } catch (error) {
-    console.error("Error parsing email:", error);
-    throw new Error("Internal Server Error");
-  }
-};
 
 export const emailParsing = async (req: Request, res: Response) => {
   const { emailContent } = req.body;
@@ -131,109 +122,164 @@ export const getRelatedReports = (req: Request, res: Response) => {
   });
 };
 
-type TStrings = {
-  ipv4: {
-    tags: string[];
-    strings: string[];
-  };
-  ipv6: {
-    tags: string[];
-    strings: string[];
-  };
-  email: {
-    tags: string[];
-    strings: string[];
-  };
-  urls: {
-    tags: string[];
-    strings: string[];
-  };
-  paths: {
-    tags: string[];
-    strings: string[];
-  };
-  addresses: {
-    tags: string[];
-    strings: string[];
-  };
-  uuid: {
-    tags: string[];
-    strings: string[];
-  };
+type TStringType = {
+  name: string;
+  display_name: string;
+  families: TStringFamily[];
+  color: string;
 };
 
-type TFamily = {
+type TStringFamily = {
   name: string;
   display_name?: string;
   color: string;
 };
 
-type TStringsOutput = {
-  families: TFamily;
-  strings: TStrings;
+type TStringTag = {
+  name: string;
+  display_name: string;
+  color: string;
 };
 
-export const extractStrings = (email: ParsedMail): TStringsOutput => {
+type StringType = {
+  string: string;
+  tags: TStringTag[];
+};
+
+type TStrings = {
+  familyTypes: TStringType[];
+  families: TStringFamily[];
+  strings: [
+    {
+      name: string;
+      family: string;
+      familyType: string;
+      strings: StringType[];
+    }
+  ];
+};
+/*
+
+      ipv4: {
+        tags: [],
+        family: DEFAULT_FAMILY,
+        familyType: DEFAULT_FAMILY_TYPE,
+        strings: ipv4,
+      },
+      ipv6: {
+        tags: ["IP"],
+        family: DEFAULT_FAMILY,
+        familyType: DEFAULT_FAMILY_TYPE,
+        strings: ipv6,
+      },
+      email: {
+        tags: ["email"],
+        family: DEFAULT_FAMILY,
+        familyType: DEFAULT_FAMILY_TYPE,
+        strings: emailAddresses,
+      },
+      urls: {
+        tags: ["url"],
+        family: DEFAULT_FAMILY,
+        familyType: DEFAULT_FAMILY_TYPE,
+        strings: url,
+      },
+      paths: {
+        tags: ["path"],
+        family: DEFAULT_FAMILY,
+        familyType: DEFAULT_FAMILY_TYPE,
+        strings: [],
+      },
+      addresses: {
+        tags: ["address"],
+        family: DEFAULT_FAMILY,
+        familyType: DEFAULT_FAMILY_TYPE,
+        strings: [],
+      },
+      uuid: {
+        tags: ["uuid"],
+        family: DEFAULT_FAMILY,
+        familyType: DEFAULT_FAMILY_TYPE,
+        strings: uuid,
+      },
+*/
+
+const DEFAULT_FAMILY_TYPE = "common";
+const DEFAULT_FAMILY = "common";
+
+const extractStrings = (email: ParsedMail): TStrings => {
+  if (!email.html) return {} as TStrings;
   const ipv4 = extractFromText(email.html, IPV4_REGEX);
   const ipv6 = extractFromText(email.html, IPV6_REGEX);
   const emailAddresses = extractFromText(email.html, EMAIL_REGEX);
   const url = extractFromText(email.html, URL_REGEX);
   const uuid = extractFromText(email.html, UUID_REGEX);
 
-  const output: TStringsOutput = {
-    families: [
-      {
-        name: "ip",
-        display_name: "IP",
-        color: "#f44336",
-      },
-      {
-        name: "email",
-        display_name: "Email",
-        color: "#e91e63",
-      },
-      {
-        name: "url",
-        display_name: "URL",
-        color: "#9c27b0",
-      },
-      {
-        name: "uuid",
-        display_name: "UUID",
-        color: "#673ab7",
-      },
-    ],
-    strings: {
-      ipv4: {
-        tags: ["IP"],
-        strings: ipv4,
-      },
-      ipv6: {
-        tags: ["IP"],
-        strings: ipv6,
-      },
-      email: {
-        tags: ["Email"],
-        strings: emailAddresses,
-      },
-      urls: {
-        tags: ["URL"],
-        strings: url,
-      },
-      paths: {
-        tags: [],
-        strings: [],
-      },
-      addresses: {
-        tags: [],
-        strings: [],
-      },
-      uuid: {
-        tags: ["UUID"],
-        strings: uuid,
-      },
+  const familyTypes: TStringType[] = [
+    {
+      name: "malware",
+      display_name: "Malware",
+      families: [
+        {
+          name: "masslogger",
+          display_name: "MassLogger",
+          color: "#ff9800",
+        },
+        // Add more malware families...
+      ],
+      color: "#f44336",
     },
+    {
+      name: "common",
+      display_name: "Common",
+      families: [
+        {
+          name: "common",
+          display_name: "Common",
+          color: "#4caf50",
+        },
+      ],
+      color: "#4caf50",
+    },
+    // Add more types...
+  ];
+
+  const tags: TStringTag[] = [
+    {
+      name: "generic",
+      display_name: "Generic",
+      color: "#4caf50",
+    },
+    // Add more tags...
+  ];
+
+  const strings: TStrings = {
+    familyTypes,
+    strings: [],
   };
 
-  return output;
+  const stringTypes = [
+    { name: "uuid", strings: uuid },
+    { name: "ipv4", strings: ipv4 },
+    { name: "ipv6", strings: ipv6 },
+    { name: "email", strings: emailAddresses },
+    { name: "urls", strings: url },
+
+    // Add more string types if needed
+  ];
+
+  strings.strings = [
+    ...stringTypes.map((item) => ({
+      name: item.name,
+      strings: item.strings.map((string) => ({
+        string: string,
+        tags: ["test"],
+        family: DEFAULT_FAMILY,
+        familyType: DEFAULT_FAMILY_TYPE,
+      })),
+      tags: tags.map((tag) => tag.name),
+    })),
+  ];
+
+  return strings;
 };
