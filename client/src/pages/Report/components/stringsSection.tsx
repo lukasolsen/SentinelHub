@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type TStringType = {
   name: string;
@@ -31,6 +31,9 @@ type TStrings = {
 };
 
 function StringsSection({ strings }: { strings: TStrings }) {
+  const [filteredStrings, setFilteredStrings] = useState<TStrings["strings"]>(
+    strings.strings
+  );
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [searchFilter, setSearchFilter] = useState<string>("");
 
@@ -44,6 +47,48 @@ function StringsSection({ strings }: { strings: TStrings }) {
     );
   }
 
+  const familyTypes = strings.familyTypes;
+
+  const filterStrings = () => {
+    const filteredStrings = strings.strings.map((stringGroup) => {
+      const filteredStrings = stringGroup.strings.filter((string) => {
+        if (selectedFilters.length === 0 && searchFilter === "") {
+          return true;
+        }
+
+        if (selectedFilters.length === 0) {
+          return string.string
+            .toLowerCase()
+            .includes(searchFilter.toLowerCase());
+        }
+
+        const familyType = strings.familyTypes.find((type) => {
+          return type.name === string.familyType;
+        });
+
+        const family = familyType?.families.find((family) => {
+          return family.name === string.family;
+        });
+
+        const stringFilter = string.string
+          .toLowerCase()
+          .includes(searchFilter.toLowerCase());
+
+        const familyFilter = selectedFilters.includes(familyType?.name!);
+
+        return stringFilter && familyFilter;
+      });
+
+      return {
+        name: stringGroup.name,
+        strings: filteredStrings,
+      };
+    });
+    console.log(filteredStrings);
+
+    setFilteredStrings(filteredStrings);
+  };
+
   const handleFilterChange = (family: string) => {
     if (selectedFilters.includes(family)) {
       setSelectedFilters(selectedFilters.filter((filter) => filter !== family));
@@ -52,38 +97,9 @@ function StringsSection({ strings }: { strings: TStrings }) {
     }
   };
 
-  const familyTypes = strings.familyTypes;
-
-  // filter strings based on selected filters and search filter
-  const filteredStrings = strings.strings.filter((string) => {
-    if (string.strings.length === 0) {
-      return false;
-    }
-
-    if (selectedFilters.length === 0 && searchFilter === "") {
-      return true;
-    }
-
-    if (selectedFilters.length === 0 && searchFilter !== "") {
-      return string.strings[0].string.includes(searchFilter);
-    }
-
-    if (selectedFilters.length !== 0 && searchFilter === "") {
-      return selectedFilters.includes(string.strings[0].familyType);
-    }
-
-    if (selectedFilters.length !== 0 && searchFilter !== "") {
-      return (
-        selectedFilters.includes(string.strings[0].familyType) &&
-        string.strings[0].string.includes(searchFilter)
-      );
-    }
-
-    return false;
-  });
-
   const handleSearchFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchFilter(e.target.value);
+    filterStrings();
   };
 
   return (
@@ -107,7 +123,10 @@ function StringsSection({ strings }: { strings: TStrings }) {
                 <input
                   type="checkbox"
                   checked={selectedFilters.length === 0}
-                  onChange={() => setSelectedFilters([])}
+                  onChange={() => {
+                    setSelectedFilters([]);
+                    filterStrings();
+                  }}
                   className="rounded-sm text-blue-500 dark:bg-gray-800 focus:outline-none focus-visible:outline-none focus:ring-transparent"
                 />
                 <span>All</span>
@@ -119,7 +138,10 @@ function StringsSection({ strings }: { strings: TStrings }) {
                   <input
                     type="checkbox"
                     checked={selectedFilters.includes(type.name)}
-                    onChange={() => handleFilterChange(type.name)}
+                    onChange={() => {
+                      handleFilterChange(type.name);
+                      filterStrings();
+                    }}
                     className={`rounded-sm text-blue-500 bg-transparent focus:outline-none focus-visible:outline-none focus:ring-transparent border`}
                     style={{ borderColor: type.color }}
                   />
@@ -143,7 +165,7 @@ function StringsSection({ strings }: { strings: TStrings }) {
                     >
                       <div className="flex flex-row items-center justify-between py-2">
                         <div className="w-6/12 pr-4">{string.string}</div>
-                        <div className="flex flex-row w-4/12 text-gray-500">
+                        <div className="flex flex-row w-4/12 dark:text-gray-500">
                           <span
                             className="mr-1 font-semibold"
                             style={{
@@ -158,7 +180,7 @@ function StringsSection({ strings }: { strings: TStrings }) {
                               })?.display_name
                             }
                           </span>
-                          <span className="ml-4 text-gray-400">
+                          <span className="ml-4 dark:text-gray-400">
                             {
                               strings.familyTypes
                                 .find((type) => {

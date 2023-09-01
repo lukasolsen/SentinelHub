@@ -298,9 +298,17 @@ type TStrings = {
         strings: uuid,
       },
 */
-
 const DEFAULT_FAMILY_TYPE = "common";
 const DEFAULT_FAMILY = "common";
+
+// Function to determine familyType based on family name
+const determineFamilyType = (familyName: string): string => {
+  if (familyName === "Network Traffic") {
+    return "network";
+  }
+  // Add more conditions as needed
+  return DEFAULT_FAMILY_TYPE;
+};
 
 const extractStrings = (email: ParsedMail): TStrings => {
   if (!email.html) return {} as TStrings;
@@ -355,6 +363,11 @@ const extractStrings = (email: ParsedMail): TStrings => {
           display_name: "Common",
           color: "#4caf50",
         },
+        {
+          name: "Network Traffic",
+          display_name: "Network Traffic",
+          color: "#4caf50",
+        },
       ],
       color: "#4caf50",
     },
@@ -376,56 +389,56 @@ const extractStrings = (email: ParsedMail): TStrings => {
       {
         name: "ipv4",
         family: DEFAULT_FAMILY,
-        familyType: DEFAULT_FAMILY_TYPE,
+        familyType: determineFamilyType(DEFAULT_FAMILY), // Use the determineFamilyType function
         strings: ipv4Strings.map((string) => ({
           string,
           tags: ["ipv4"],
           family: DEFAULT_FAMILY,
-          familyType: DEFAULT_FAMILY_TYPE,
+          familyType: determineFamilyType(DEFAULT_FAMILY),
         })),
       },
       {
         name: "ipv6",
         family: DEFAULT_FAMILY,
-        familyType: DEFAULT_FAMILY_TYPE,
+        familyType: determineFamilyType(DEFAULT_FAMILY),
         strings: ipv6Strings.map((string) => ({
           string,
           tags: ["ipv6"],
           family: DEFAULT_FAMILY,
-          familyType: DEFAULT_FAMILY_TYPE,
+          familyType: determineFamilyType(DEFAULT_FAMILY),
         })),
       },
       {
         name: "email",
         family: DEFAULT_FAMILY,
-        familyType: DEFAULT_FAMILY_TYPE,
+        familyType: determineFamilyType(DEFAULT_FAMILY),
         strings: emailStrings.map((string) => ({
           string,
           tags: ["email"],
           family: DEFAULT_FAMILY,
-          familyType: DEFAULT_FAMILY_TYPE,
+          familyType: determineFamilyType(DEFAULT_FAMILY),
         })),
       },
       {
         name: "urls",
         family: DEFAULT_FAMILY,
-        familyType: DEFAULT_FAMILY_TYPE,
+        familyType: determineFamilyType(DEFAULT_FAMILY),
         strings: urlStrings.map((string) => ({
           string,
           tags: ["url"],
           family: DEFAULT_FAMILY,
-          familyType: DEFAULT_FAMILY_TYPE,
+          familyType: determineFamilyType(DEFAULT_FAMILY),
         })),
       },
       {
         name: "uuid",
         family: DEFAULT_FAMILY,
-        familyType: DEFAULT_FAMILY_TYPE,
+        familyType: determineFamilyType(DEFAULT_FAMILY),
         strings: uuidStrings.map((string) => ({
           string,
           tags: ["uuid"],
           family: DEFAULT_FAMILY,
-          familyType: DEFAULT_FAMILY_TYPE,
+          familyType: determineFamilyType(DEFAULT_FAMILY),
         })),
       },
       // Add more string types if needed
