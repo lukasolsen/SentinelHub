@@ -16,7 +16,6 @@ export default function GeneticAnalysis({
   data: IDataOutput;
   relations: Relations;
 }) {
-  console.log(relations?.reports?.equalIPs);
   const [geneticAnalysisTab, setGeneticAnalysisTab] = useState("summary");
 
   // check if the vendor is a threat, if it is count it in
@@ -284,7 +283,7 @@ export default function GeneticAnalysis({
               <div className="dark:text-white">
                 <hr className="dark:border-gray-700" />
                 <h1 className="mb-2 mt-2 font-bold text-[1rem] flex flex-row items-center">
-                  Relative IP Addresses ({relations?.reports?.equalIPs?.length})
+                  Relative Samples ({relations?.relatedSamples?.length})
                   <FaQuestionCircle
                     className="ml-2 text-blue-600 cursor-pointer"
                     data-tooltip-target="relativeIPsTooltip"
@@ -317,7 +316,7 @@ export default function GeneticAnalysis({
                     </div>
                   </div>
 
-                  {relations?.reports?.equalIPs?.map(
+                  {relations?.relatedSamples?.map(
                     (report: IDataOutput, index: number) => (
                       <div
                         className="flex flex-row justify-between mt-2 items-center dark:text-white"
@@ -333,15 +332,8 @@ export default function GeneticAnalysis({
                         </div>
                         <div className="w-2/12 text-base">
                           <span
-                            className={`${
-                              data?.vendors?.filter(
-                                (vendor) => vendor.isThreat === true
-                              ).length > 0 && "text-red-600"
-                            } ${
-                              data?.vendors?.filter(
-                                (vendor) => vendor.isThreat === true
-                              ).length <= 0 && "text-green-500"
-                            }`}
+                            className={`${!data.isSafe && "text-red-600"} 
+                            ${data.isSafe && "text-green-500"}`}
                           >
                             {report.verdict}
                           </span>
@@ -349,23 +341,13 @@ export default function GeneticAnalysis({
                         <div className="w-2/12">
                           <span className="dark:text-gray-400 text-gray-600 text-base">
                             <span
-                              className={`${
-                                data?.vendors?.filter(
-                                  (vendor) => vendor.isThreat === true
-                                ).length > 0 && "text-red-600"
-                              } ${
-                                data?.vendors?.filter(
-                                  (vendor) => vendor.isThreat === true
-                                ).length <= 0 && "text-green-500"
+                              className={`${!data.isSafe && "text-red-600"} ${
+                                data.isSafe && "text-green-500"
                               }`}
                             >
-                              {
-                                data?.vendors?.filter(
-                                  (vendor) => vendor.isThreat === true
-                                ).length
-                              }
+                              {data.totalVendorsThreats}
                             </span>{" "}
-                            / {data.vendors.length}
+                            / {data.totalVendors}
                           </span>
                         </div>
                         <div className="w-2/12">
@@ -387,7 +369,7 @@ export default function GeneticAnalysis({
           )}
 
           {geneticAnalysisTab === "strings" && (
-            <StringsSection strings={data.strings} />
+            <StringsSection id={data.reportId} />
           )}
         </div>
       </div>

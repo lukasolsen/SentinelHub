@@ -1,5 +1,5 @@
 import { FaMoon, FaSun, FaSearch } from "react-icons/fa";
-import { useTheme } from "../providers/TThemeProvider";
+import { useTheme } from "../context/TThemeProvider";
 
 function ThemeSwitcher() {
   const { theme, toggleTheme } = useTheme();

@@ -16,6 +16,9 @@ export default {
 
         // Text Colors
         bodyTextWhite: "#20242c",
+        threat: "#dc2626",
+        suspicious: "rgb(255 193 7)",
+        safe: "#16a34a",
         // ... (other colors)
       },
       fontSize: {

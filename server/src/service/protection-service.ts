@@ -56,16 +56,8 @@ export const CheckIP = async (ip: string): Promise<IPResponse> => {
   );
 
   const isThreat = vendorsData.some((vendor) => vendor.isThreat);
-  console.log("isThreat ->", isThreat);
 
   const tagsArray = vendorsData.flatMap((vendor) => vendor.tags);
-  console.log("tagsArray ->", tagsArray);
-
-  console.log("isThreat ->", isThreat, "\n");
-  console.log("tagsArray ->", tagsArray, "\n");
-  console.log("vendorsData ->", vendorsData, "\n");
-  console.log("country ->", vendorsData[2].country.code, "\n");
-  console.log("ip ->", ip, "\n");
   return {
     verdict: isThreat ? "Threat" : "Safe",
     tags: tagsArray,

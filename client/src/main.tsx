@@ -4,10 +4,10 @@ import "./index.css";
 import Navbar from "./components/Navbar.tsx";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material";
-import AddReport from "./pages/AddReport.tsx";
+import AddReport from "./pages/AddReports/AddReport.tsx";
 import Report from "./pages/Report/Report.tsx";
-import Requests from "./pages/Requests.tsx";
-import { TThemeProvider } from "./providers/TThemeProvider.tsx";
+import Browse from "./pages/Browse/Browse.tsx";
+import { TThemeProvider } from "./context/TThemeProvider.tsx";
 
 const router = createBrowserRouter([
   {
@@ -27,8 +27,8 @@ const router = createBrowserRouter([
     element: <Report />,
   },
   {
-    path: "/database",
-    element: <Requests />,
+    path: "/browse",
+    element: <Browse />,
   },
 ]);
 

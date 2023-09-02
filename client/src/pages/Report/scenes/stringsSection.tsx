@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { getStrings } from "../../../service/api-service";
 
 type TStringType = {
   name: string;
@@ -30,28 +31,25 @@ type TStrings = {
   ];
 };
 
-function StringsSection({ strings }: { strings: TStrings }) {
-  const [filteredStrings, setFilteredStrings] = useState<TStrings["strings"]>(
-    strings.strings
-  );
+function StringsSection({ id }: { id: number }) {
+  const [strings, setStrings] = useState<TStrings | null>(null);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [searchFilter, setSearchFilter] = useState<string>("");
 
-  if (!strings) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64">
-        <h2 className="text-2xl font-bold text-gray-500 dark:text-gray-400">
-          No Strings Found
-        </h2>
-      </div>
-    );
-  }
+  useEffect(() => {
+    getStrings(id).then((data) => {
+      console.log(data);
+      setStrings(data);
+    });
+  }, []);
 
-  const familyTypes = strings.familyTypes;
+  const filteredStrings = useMemo(() => {
+    if (!strings) {
+      return [];
+    }
 
-  const filterStrings = () => {
-    const filteredStrings = strings.strings.map((stringGroup) => {
-      const filteredStrings = stringGroup.strings.filter((string) => {
+    return strings.strings.map((stringGroup) => {
+      return stringGroup.strings.filter((string) => {
         if (selectedFilters.length === 0 && searchFilter === "") {
           return true;
         }
@@ -78,16 +76,22 @@ function StringsSection({ strings }: { strings: TStrings }) {
 
         return stringFilter && familyFilter;
       });
-
-      return {
-        name: stringGroup.name,
-        strings: filteredStrings,
-      };
     });
-    console.log(filteredStrings);
+  }, [selectedFilters, searchFilter, strings]);
 
-    setFilteredStrings(filteredStrings);
-  };
+  console.log(filteredStrings);
+
+  if (!strings) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <h2 className="text-2xl font-bold text-gray-500 dark:text-gray-400">
+          No Strings Found
+        </h2>
+      </div>
+    );
+  }
+
+  const familyTypes = strings.familyTypes;
 
   const handleFilterChange = (family: string) => {
     if (selectedFilters.includes(family)) {
@@ -99,7 +103,11 @@ function StringsSection({ strings }: { strings: TStrings }) {
 
   const handleSearchFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchFilter(e.target.value);
-    filterStrings();
+  };
+
+  const handleClearFilters = () => {
+    setSelectedFilters([]);
+    setSearchFilter("");
   };
 
   return (
@@ -123,10 +131,7 @@ function StringsSection({ strings }: { strings: TStrings }) {
                 <input
                   type="checkbox"
                   checked={selectedFilters.length === 0}
-                  onChange={() => {
-                    setSelectedFilters([]);
-                    filterStrings();
-                  }}
+                  onChange={handleClearFilters}
                   className="rounded-sm text-blue-500 dark:bg-gray-800 focus:outline-none focus-visible:outline-none focus:ring-transparent"
                 />
                 <span>All</span>
@@ -138,10 +143,7 @@ function StringsSection({ strings }: { strings: TStrings }) {
                   <input
                     type="checkbox"
                     checked={selectedFilters.includes(type.name)}
-                    onChange={() => {
-                      handleFilterChange(type.name);
-                      filterStrings();
-                    }}
+                    onChange={() => handleFilterChange(type.name)}
                     className={`rounded-sm text-blue-500 bg-transparent focus:outline-none focus-visible:outline-none focus:ring-transparent border`}
                     style={{ borderColor: type.color }}
                   />
@@ -158,7 +160,7 @@ function StringsSection({ strings }: { strings: TStrings }) {
             {filteredStrings.map((stringGroup, index) => (
               <li key={index} className="mb-4">
                 <ul>
-                  {stringGroup.strings.map((string, stringIndex) => (
+                  {stringGroup.map((string, stringIndex) => (
                     <li
                       key={stringIndex}
                       className="text-base text-gray-600 dark:text-gray-400"
@@ -176,7 +178,7 @@ function StringsSection({ strings }: { strings: TStrings }) {
                           >
                             {
                               strings.familyTypes.find((type) => {
-                                return type.name === string.family;
+                                return type.name === string.familyType;
                               })?.display_name
                             }
                           </span>

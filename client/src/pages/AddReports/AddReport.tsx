@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { addEmailContent, sendEmailContent } from "../service/api-service";
+import { addEmailContent, sendEmailContent } from "../../service/api-service";
 
 export default function AddReport() {
   const [page, setPage] = useState(1);

@@ -88,24 +88,37 @@ export const getEmails = async (): Promise<ErrorResponse | VendorOutput[]> => {
 export const getEmail = async (
   id: string
 ): Promise<ErrorResponse | IDataOutput> => {
-  const api = `http://localhost:1200/api/email/bad-email/${id}`;
+  const api = `http://localhost:1200/api/email/get/${id}`;
 
   return makeGetRequest<IDataOutput>(api);
 };
 
 export const getRelatedReports = async (
-  ip: string,
-  id: number,
-  verdict: string
+  id: number
 ): Promise<ErrorResponse | VendorOutput[]> => {
-  console.log(ip, id, verdict);
-  const api = `http://localhost:1200/api/email/related-reports`;
+  const api = `http://localhost:1200/api/email/get/${id}/related-samples`;
   //Make the things in body
-  const queryParams = {
-    ip,
-    id,
-    verdict,
-  };
 
-  return makeGetRequest<VendorOutput[]>(api, queryParams);
+  return makeGetRequest<VendorOutput[]>(api);
+};
+
+export const getVendors = async (
+  id: number
+): Promise<ErrorResponse | VendorOutput[]> => {
+  const api = `http://localhost:1200/api/email/get/${id}/vendors`;
+  return makeGetRequest<VendorOutput[]>(api);
+};
+
+export const getStrings = async (
+  id: number
+): Promise<ErrorResponse | VendorOutput[]> => {
+  const api = `http://localhost:1200/api/email/get/${id}/strings`;
+  return makeGetRequest<VendorOutput[]>(api);
+};
+
+export const getStatistics = async (): Promise<
+  ErrorResponse | VendorOutput[]
+> => {
+  const api = `http://localhost:1200/api/email/statistics`;
+  return makeGetRequest<VendorOutput[]>(api);
 };

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { getEmails } from "../service/api-service";
+import { getEmails } from "../../service/api-service";
 import { FaCheck, FaExclamationTriangle } from "react-icons/fa";
+import Statistics from "./scenes/Statistics";
 
 export default function Requests() {
   const [data, setData] = useState<IDataOutput[]>([]);
@@ -109,6 +110,8 @@ export default function Requests() {
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
         Public Requests
       </h1>
+      <Statistics />
+      <div className="mb-6" /> {/* Add some margin bottom */}
       <table className="w-full">
         <thead>
           <tr>

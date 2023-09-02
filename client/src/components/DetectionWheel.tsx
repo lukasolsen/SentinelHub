@@ -5,7 +5,11 @@ interface DetectionWheelProps {
   threatVendors: number;
   unsecureVendors: number;
 }
-
+/**
+ * @deprecated This component is not used anywhere in the app.
+ * @param param0
+ * @returns
+ */
 const DetectionWheel: React.FC<DetectionWheelProps> = ({
   totalVendors,
   threatVendors,

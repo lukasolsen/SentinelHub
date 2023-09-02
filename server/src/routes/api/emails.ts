@@ -4,14 +4,7 @@ import { generateHash, generateMD5, getEmailContent } from "../../utils/Util";
 import { ParsedMail } from "mailparser";
 import { Vendor } from "../../types/global";
 import { CheckIP } from "../../service/protection-service";
-import {
-  EMAIL_REGEX,
-  IPV4_REGEX,
-  IPV6_REGEX,
-  URL_REGEX,
-  UUID_REGEX,
-  extractFromText,
-} from "../../utils/stringExtractor";
+import { extractStrings } from "../../utils/stringExtractor";
 const auth = require("../auth");
 const router = express.Router();
 
@@ -104,20 +97,114 @@ router.param("verdict", (req, res, next, verdict) => {
   next();
 });
 
-// Get a bad email by ID
+// Remove fields from the response, based on whitelists
+// Sanitize an email by deleting specific fields
+const sanitizeEmail = (email: IEmail, whitelist: string[] = []): IEmail => {
+  if (email) {
+    // Create a sanitized copy of the email
+    const sanitizedEmail: IEmail = { ...email };
+
+    const fieldsToDelete = [
+      "strings",
+      "vendors",
+      "metadata.to",
+      "data.headers",
+      "data.to",
+      "data.headerLines",
+      "data.html",
+      "data.text",
+      "data.textAsHtml",
+    ];
+
+    // Iterate through the fields to delete and remove them
+    for (const field of fieldsToDelete) {
+      if (!whitelist.includes(field)) delete sanitizedEmail[field];
+    }
+
+    return sanitizedEmail;
+  }
+  return email; // Return the original email if it's null or undefined
+};
+
+// ? Get bad email by ID
 router.get(
-  "/bad-email/:id",
+  "/get/:id",
   auth.optional,
   function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
     const email = badEmails.find((item) => item.reportId === parseInt(id));
-    const emailWithoutTo = email
-      ? { ...email, metadata: { ...email.metadata, to: undefined } }
-      : null;
-    res.send(emailWithoutTo);
+    const sanitizedEmail = sanitizeEmail(email);
+    res.send(sanitizedEmail);
   }
 );
 
+// ? Get related samples by ID with pagination
+router.get(
+  "/get/:id/related-samples",
+  auth.optional,
+  function (req: Request, res: Response, next: NextFunction) {
+    const { id } = req.body;
+    const { offset } = req.query;
+    const email = badEmails.find((item) => item.reportId === parseInt(id));
+
+    if (email) {
+      // Define pagination parameters
+      const startIndex = offset ? parseInt(offset) : 0;
+      const samplesPerPage = 5;
+
+      // Filter related samples
+      const relatedSamples = badEmails
+        .filter(
+          (item) =>
+            item.reportId !== parseInt(id) && item.verdict === email.verdict
+        )
+        .slice(startIndex, startIndex + samplesPerPage);
+
+      // Sanitize related samples (remove unnecessary fields)
+      const sanitizedRelatedSamples = relatedSamples.map((item) =>
+        sanitizeEmail(item)
+      );
+
+      // Return the sanitized related samples along with pagination information
+      res.send({
+        relatedSamples: sanitizedRelatedSamples,
+        totalRelatedSamples: relatedSamples.length, // Provide the total number of related samples
+        currentPage: Math.floor(startIndex / samplesPerPage) + 1, // Calculate the current page
+        samplesPerPage,
+      });
+    } else {
+      res.status(404).send({ message: "Report not found" });
+    }
+  }
+);
+
+// ? Get vendors from report
+router.get(
+  "/get/:id/vendors",
+  auth.optional,
+  function (req: Request, res: Response, next: NextFunction) {
+    const { id } = req.body;
+    const email = badEmails.find((item) => item.reportId === parseInt(id));
+
+    const sanitizedEmail = sanitizeEmail(email, ["vendors"]);
+    res.send(sanitizedEmail?.vendors || []); // Return an empty array if vendors are not found
+  }
+);
+
+// ? Get strings from id
+router.get(
+  "/get/:id/strings",
+  auth.optional,
+  function (req: Request, res: Response, next: NextFunction) {
+    const { id } = req.body;
+    const email = badEmails.find((item) => item.reportId === parseInt(id));
+
+    const sanitizedEmail = sanitizeEmail(email, ["strings"]);
+    res.send(sanitizedEmail?.strings || []); // Return an empty array if strings are not found
+  }
+);
+
+//TODO: Needs to be fixed for newer data
 router.get(
   "/bad-emails",
   auth.optional,
@@ -131,28 +218,95 @@ router.get(
   }
 );
 
+//TODO: Implement a statistics endpoint
 router.get(
-  "/related-reports",
+  "/statistics",
   auth.optional,
   function (req: Request, res: Response, next: NextFunction) {
-    const { ip, id, verdict } = req.query; // Use req.query to get query parameters
-    console.log("ip ->", ip);
-    console.log("id ->", id);
-    console.log("verdict ->", verdict);
+    const totalEmails = badEmails.length;
+    const totalSafe = badEmails.filter((item) => item.isSafe).length;
+    const totalThreats = badEmails.filter((item) => !item.isSafe).length;
 
-    const equalVerdicts = badEmails.filter(
-      (item) => item.reportId !== parseInt(id) && item.verdict === verdict
-    );
+    // Get all the amount of safe emails, and threats number, from dates.
 
-    const equalIPs = equalVerdicts.filter(
-      (item) => item.metadata.ip === ip && item.reportId !== parseInt(id)
-    );
+    /* Data required for Pie Chart:
+              data={[
+                {
+                  id: "safe",
+                  label: "Safe",
+                  value: 2290,
+                  color: "hsl(120, 70%, 50%)", // Green color for safe files
+                },
+                {
+                  id: "threats",
+                  label: "Threats",
+                  value: 20111,
+                  color: "hsl(0, 70%, 50%)", // Red color for malicious files
+                },
+              ]}
+            */
+
+    //get all reports, but just get the date, and verdict
+    const lineChartData = badEmails.map((item) => ({
+      date: item.metadata.date,
+      verdict: item.verdict,
+    }));
+
+    //Make a list with the date as the key, and the value as the amount of safe emails, and threats
+    const lineChartDataDict = {};
+    lineChartData.forEach((item) => {
+      if (lineChartDataDict[item.date]) {
+        if (item.verdict === "safe") {
+          lineChartDataDict[item.date].safe += 1;
+        } else {
+          lineChartDataDict[item.date].threats += 1;
+        }
+      } else {
+        lineChartDataDict[item.date] = {
+          safe: item.verdict === "safe" ? 1 : 0,
+          threats: item.verdict === "safe" ? 0 : 1,
+        };
+      }
+    });
 
     res.send({
-      reports: {
-        equalIPs: equalIPs,
-        equalVerdicts: equalVerdicts,
-      },
+      totalEmails,
+      totalSafe,
+      totalThreats,
+      pieChartData: [
+        {
+          id: "safe",
+          label: "Safe",
+          value: totalSafe,
+          color: "hsl(142, 79%, 36%)", // Green color for safe files
+        },
+        {
+          id: "threats",
+          label: "Threats",
+          value: totalThreats,
+          color: "#dc2626", // Red color for malicious files
+        },
+      ],
+      lineChartData: [
+        {
+          id: "safe",
+          label: "Safe",
+          color: "hsl(142, 79%, 36%)",
+          data: Object.keys(lineChartDataDict).map((key) => ({
+            x: key,
+            y: lineChartDataDict[key].safe,
+          })),
+        },
+        {
+          id: "threats",
+          label: "Threats",
+          color: "#dc2626",
+          data: Object.keys(lineChartDataDict).map((key) => ({
+            x: key,
+            y: lineChartDataDict[key].threats,
+          })),
+        },
+      ],
     });
   }
 );
@@ -171,7 +325,7 @@ router.post(
 
     const newBadEmail = await createBadEmailEntry(parsed, ip);
     // Extract all possible strings
-    const strings = extractStrings(parsed);
+    const strings = extractStrings(emailContent);
     console.log(strings);
     // Add the strings to the bad email entry
     newBadEmail.strings = strings;
@@ -209,6 +363,12 @@ const createBadEmailEntry = async (
     },
     vendors: data.vendors,
     verdict: data.verdict,
+    isSafe: data.verdict.toLowerCase() === "safe" ? true : false,
+    totalVendorsSafe: data.vendors.filter((item) => item.isThreat === false)
+      .length,
+    totalVendorsThreats: data.vendors.filter((item) => item.isThreat === true)
+      .length,
+    totalVendors: data.vendors.length,
     country: {
       code: data.country.code,
       name: data.country.name,
@@ -216,236 +376,4 @@ const createBadEmailEntry = async (
     //families_seen: data.family_seen,
   };
 };
-
-type TStringType = {
-  name: string;
-  display_name: string;
-  families: TStringFamily[];
-  color: string;
-};
-
-type TStringFamily = {
-  name: string;
-  display_name?: string;
-  color: string;
-};
-
-type TStringTag = {
-  name: string;
-  display_name: string;
-  color: string;
-};
-
-type StringType = {
-  string: string;
-  tags: TStringTag[];
-};
-
-type TStrings = {
-  familyTypes: TStringType[];
-  families: TStringFamily[];
-  strings: [
-    {
-      name: string;
-      family: string;
-      familyType: string;
-      strings: StringType[];
-    }
-  ];
-};
-/*
-
-      ipv4: {
-        tags: [],
-        family: DEFAULT_FAMILY,
-        familyType: DEFAULT_FAMILY_TYPE,
-        strings: ipv4,
-      },
-      ipv6: {
-        tags: ["IP"],
-        family: DEFAULT_FAMILY,
-        familyType: DEFAULT_FAMILY_TYPE,
-        strings: ipv6,
-      },
-      email: {
-        tags: ["email"],
-        family: DEFAULT_FAMILY,
-        familyType: DEFAULT_FAMILY_TYPE,
-        strings: emailAddresses,
-      },
-      urls: {
-        tags: ["url"],
-        family: DEFAULT_FAMILY,
-        familyType: DEFAULT_FAMILY_TYPE,
-        strings: url,
-      },
-      paths: {
-        tags: ["path"],
-        family: DEFAULT_FAMILY,
-        familyType: DEFAULT_FAMILY_TYPE,
-        strings: [],
-      },
-      addresses: {
-        tags: ["address"],
-        family: DEFAULT_FAMILY,
-        familyType: DEFAULT_FAMILY_TYPE,
-        strings: [],
-      },
-      uuid: {
-        tags: ["uuid"],
-        family: DEFAULT_FAMILY,
-        familyType: DEFAULT_FAMILY_TYPE,
-        strings: uuid,
-      },
-*/
-const DEFAULT_FAMILY_TYPE = "common";
-const DEFAULT_FAMILY = "common";
-
-// Function to determine familyType based on family name
-const determineFamilyType = (familyName: string): string => {
-  if (familyName === "Network Traffic") {
-    return "network";
-  }
-  // Add more conditions as needed
-  return DEFAULT_FAMILY_TYPE;
-};
-
-const extractStrings = (email: ParsedMail): TStrings => {
-  if (!email.html) return {} as TStrings;
-
-  const regexes: RegExp[] = [
-    IPV4_REGEX,
-    IPV6_REGEX,
-    EMAIL_REGEX,
-    URL_REGEX,
-    UUID_REGEX,
-    // Add more regexes as needed
-  ];
-
-  const extractedStrings = extractFromText(email.html, regexes);
-
-  const ipv4Strings = extractedStrings.filter((string) =>
-    IPV4_REGEX.test(string)
-  );
-  const ipv6Strings = extractedStrings.filter((string) =>
-    IPV6_REGEX.test(string)
-  );
-  const emailStrings = extractedStrings.filter((string) =>
-    EMAIL_REGEX.test(string)
-  );
-  const urlStrings = extractedStrings.filter((string) =>
-    URL_REGEX.test(string)
-  );
-  const uuidStrings = extractedStrings.filter((string) =>
-    UUID_REGEX.test(string)
-  );
-
-  const familyTypes: TStringType[] = [
-    {
-      name: "malware",
-      display_name: "Malware",
-      families: [
-        {
-          name: "masslogger",
-          display_name: "MassLogger",
-          color: "#ff9800",
-        },
-        // Add more malware families...
-      ],
-      color: "#f44336",
-    },
-    {
-      name: "common",
-      display_name: "Common",
-      families: [
-        {
-          name: "common",
-          display_name: "Common",
-          color: "#4caf50",
-        },
-        {
-          name: "Network Traffic",
-          display_name: "Network Traffic",
-          color: "#4caf50",
-        },
-      ],
-      color: "#4caf50",
-    },
-    // Add more types...
-  ];
-
-  const tags: TStringTag[] = [
-    {
-      name: "generic",
-      display_name: "Generic",
-      color: "#4caf50",
-    },
-    // Add more tags...
-  ];
-
-  const strings: TStrings = {
-    familyTypes,
-    strings: [
-      {
-        name: "ipv4",
-        family: DEFAULT_FAMILY,
-        familyType: determineFamilyType(DEFAULT_FAMILY), // Use the determineFamilyType function
-        strings: ipv4Strings.map((string) => ({
-          string,
-          tags: ["ipv4"],
-          family: DEFAULT_FAMILY,
-          familyType: determineFamilyType(DEFAULT_FAMILY),
-        })),
-      },
-      {
-        name: "ipv6",
-        family: DEFAULT_FAMILY,
-        familyType: determineFamilyType(DEFAULT_FAMILY),
-        strings: ipv6Strings.map((string) => ({
-          string,
-          tags: ["ipv6"],
-          family: DEFAULT_FAMILY,
-          familyType: determineFamilyType(DEFAULT_FAMILY),
-        })),
-      },
-      {
-        name: "email",
-        family: DEFAULT_FAMILY,
-        familyType: determineFamilyType(DEFAULT_FAMILY),
-        strings: emailStrings.map((string) => ({
-          string,
-          tags: ["email"],
-          family: DEFAULT_FAMILY,
-          familyType: determineFamilyType(DEFAULT_FAMILY),
-        })),
-      },
-      {
-        name: "urls",
-        family: DEFAULT_FAMILY,
-        familyType: determineFamilyType(DEFAULT_FAMILY),
-        strings: urlStrings.map((string) => ({
-          string,
-          tags: ["url"],
-          family: DEFAULT_FAMILY,
-          familyType: determineFamilyType(DEFAULT_FAMILY),
-        })),
-      },
-      {
-        name: "uuid",
-        family: DEFAULT_FAMILY,
-        familyType: determineFamilyType(DEFAULT_FAMILY),
-        strings: uuidStrings.map((string) => ({
-          string,
-          tags: ["uuid"],
-          family: DEFAULT_FAMILY,
-          familyType: determineFamilyType(DEFAULT_FAMILY),
-        })),
-      },
-      // Add more string types if needed
-    ],
-  };
-
-  return strings;
-};
-
 module.exports = router;
