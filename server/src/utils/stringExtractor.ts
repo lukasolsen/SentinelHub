@@ -222,7 +222,7 @@ export const extractStrings = (html: string): TStrings => {
           .map((string) => ({
             string,
             tags: ["ipv6"],
-
+            family: DEFAULT_FAMILY,
             familyType: "network_traffic",
           })),
       },
@@ -233,7 +233,7 @@ export const extractStrings = (html: string): TStrings => {
           .map((string) => ({
             string,
             tags: ["url"],
-
+            family: DEFAULT_FAMILY,
             familyType: "network_traffic",
           })),
       },

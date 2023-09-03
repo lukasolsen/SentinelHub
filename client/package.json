@@ -17,6 +17,7 @@
     "@mui/material": "^5.14.6",
     "@nivo/line": "^0.83.0",
     "@nivo/pie": "^0.83.0",
+    "@nivo/sunburst": "^0.83.0",
     "axios": "^1.4.0",
     "export-to-csv": "^0.2.1",
     "material-react-table": "^1.14.0",

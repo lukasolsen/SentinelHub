@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { getStrings } from "../../../service/api-service";
+import Sunbirst from "./components/Sunburst";
 
 type TStringType = {
   name: string;
@@ -212,6 +213,9 @@ function StringsSection({ id }: { id: number }) {
           </ul>
         </div>
       </div>
+
+      {/* Display statistics (Sunbirst) */}
+      <Sunbirst data={strings} />
     </div>
   );
 }
