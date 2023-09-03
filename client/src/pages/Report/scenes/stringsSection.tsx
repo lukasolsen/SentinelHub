@@ -79,8 +79,6 @@ function StringsSection({ id }: { id: number }) {
     });
   }, [selectedFilters, searchFilter, strings]);
 
-  console.log(filteredStrings);
-
   if (!strings) {
     return (
       <div className="flex flex-col items-center justify-center h-64">

@@ -30,16 +30,12 @@ const Report = () => {
   const { id } = useParams();
 
   useEffect(() => {
+    setLoading(true);
     if (!id) return;
     getEmail(id).then((data: IDataOutput) => {
       if (!data.error) setLoading(false);
-      // Make it so that all the vendors will show the threat first, then the safe ones
-      console.log(data);
-      //data.vendors.sort((a, b) => (a.isThreat && !b.isThreat ? -1 : 1));
-
       setData(data);
-
-      console.log(data);
+      setLoading(false);
     });
   }, [id]);
 
@@ -161,7 +157,7 @@ const Report = () => {
         <div className="flex flex-col items-center justify-center">
           <h1 className="text-2xl font-bold dark:text-white">Loading...</h1>
           <p className="dark:text-gray-400 mb-4">
-            Make sure you have the correct report ID.
+            Looks like this report is still being processed.
           </p>
           <h2 className="text-xl font-bold mb-4 dark:text-white">
             <div
@@ -179,13 +175,36 @@ const Report = () => {
               className="bg-card hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded mr-2 h-36 w-36 shadow-sm cursor-pointer"
               href="/"
             >
-              Home
+              Back to Home
             </a>
             <a
               className="bg-card hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded mr-2 h-36 w-36 shadow-sm cursor-pointer"
+              href="/browse"
+            >
+              Browse Reports
+            </a>
+          </div>
+        </div>
+      )}
+
+      {!data && !loading && (
+        <div className="flex flex-col items-center justify-center">
+          <h1 className="text-2xl font-bold dark:text-white">Not Found</h1>
+          <p className="dark:text-gray-400 mb-4">
+            Looks like this report doesn't exist.
+          </p>
+          <div className="flex flex-row">
+            <a
+              className="bg-card hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded mr-2 h-36 w-44  shadow-sm cursor-pointer"
               href="/"
             >
-              Database
+              Back to Home
+            </a>
+            <a
+              className="bg-card hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded mr-2 h-36 w-44 shadow-sm cursor-pointer"
+              href="/browse"
+            >
+              Browse Reports
             </a>
           </div>
         </div>

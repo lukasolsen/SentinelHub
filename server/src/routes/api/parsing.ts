@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import express from "express";
 import { getEmailContent } from "../../utils/Util";
-const auth = require("../auth");
 const router = express.Router();
 
 const emailParsing = async (req: Request, res: Response) => {
@@ -15,6 +14,6 @@ const emailParsing = async (req: Request, res: Response) => {
   }
 };
 
-router.post("/email", auth.optional, emailParsing);
+router.post("/email", emailParsing);
 
 module.exports = router;

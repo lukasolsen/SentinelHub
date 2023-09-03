@@ -5,7 +5,6 @@ import { ParsedMail } from "mailparser";
 import { Vendor } from "../../types/global";
 import { CheckIP } from "../../service/protection-service";
 import { extractStrings } from "../../utils/stringExtractor";
-const auth = require("../auth");
 const router = express.Router();
 
 type FromType = {
@@ -129,7 +128,7 @@ const sanitizeEmail = (email: IEmail, whitelist: string[] = []): IEmail => {
 // ? Get bad email by ID
 router.get(
   "/get/:id",
-  auth.optional,
+
   function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
     const email = badEmails.find((item) => item.reportId === parseInt(id));
@@ -141,7 +140,7 @@ router.get(
 // ? Get related samples by ID with pagination
 router.get(
   "/get/:id/related-samples",
-  auth.optional,
+
   function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
     const { offset } = req.query;
@@ -181,7 +180,7 @@ router.get(
 // ? Get vendors from report
 router.get(
   "/get/:id/vendors",
-  auth.optional,
+
   function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
     const email = badEmails.find((item) => item.reportId === parseInt(id));
@@ -194,7 +193,7 @@ router.get(
 // ? Get strings from id
 router.get(
   "/get/:id/strings",
-  auth.optional,
+
   function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
     const email = badEmails.find((item) => item.reportId === parseInt(id));
@@ -207,7 +206,7 @@ router.get(
 //TODO: Needs to be fixed for newer data
 router.get(
   "/bad-emails",
-  auth.optional,
+
   function (req: Request, res: Response, next: NextFunction) {
     // remove the "to" field from the response
     const emailsWithoutTo = badEmails.map(({ metadata, ...rest }) => ({
@@ -221,7 +220,7 @@ router.get(
 //TODO: Implement a statistics endpoint
 router.get(
   "/statistics",
-  auth.optional,
+
   function (req: Request, res: Response, next: NextFunction) {
     const totalEmails = badEmails.length;
     const totalSafe = badEmails.filter((item) => item.isSafe).length;
@@ -313,7 +312,7 @@ router.get(
 
 router.post(
   "/add-bad-email",
-  auth.optional,
+
   async function (req: Request, res: Response, next: NextFunction) {
     const { emailContent } = req.body;
     const parsed = await getEmailContent(emailContent);
@@ -376,4 +375,5 @@ const createBadEmailEntry = async (
     //families_seen: data.family_seen,
   };
 };
+
 module.exports = router;

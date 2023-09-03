@@ -8,6 +8,8 @@ import AddReport from "./pages/AddReports/AddReport.tsx";
 import Report from "./pages/Report/Report.tsx";
 import Browse from "./pages/Browse/Browse.tsx";
 import { TThemeProvider } from "./context/TThemeProvider.tsx";
+import NotFound from "./pages/UtilityPages/404.tsx";
+import Login from "./pages/Signups/Login.tsx";
 
 const router = createBrowserRouter([
   {
@@ -29,6 +31,10 @@ const router = createBrowserRouter([
   {
     path: "/browse",
     element: <Browse />,
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);
 

@@ -3,6 +3,7 @@ const router = express.Router();
 
 router.use("/email", require("./emails"));
 router.use("/parse", require("./parsing"));
+router.use("/user", require("./users"));
 
 router.use(function (err, req, res, next) {
   if (err.name === "ValidationError") {

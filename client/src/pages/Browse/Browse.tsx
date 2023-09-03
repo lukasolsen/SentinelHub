@@ -2,31 +2,62 @@ import { useEffect, useState } from "react";
 import { getEmails } from "../../service/api-service";
 import { FaCheck, FaExclamationTriangle } from "react-icons/fa";
 import Statistics from "./scenes/Statistics";
+import { RiSearch2Line, RiFilter3Line } from "react-icons/ri";
 
 export default function Requests() {
   const [data, setData] = useState<IDataOutput[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+
+  const getData = async () => {
+    try {
+      const emails = await getEmails();
+      setData(emails);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const emails = await getEmails();
-        setData(emails);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
+    getData();
   }, []);
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-  const maxPaginationButtons = 5; // Set the maximum number of pagination buttons to display
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentData = data.slice(startIndex, endIndex);
+  const handleFilterToggle = () => {
+    setShowFilters(!showFilters);
+  };
+
+  const handleFilterSelection = (filter: string) => {
+    if (selectedFilters.includes(filter)) {
+      setSelectedFilters(selectedFilters.filter((f) => f !== filter));
+    } else {
+      setSelectedFilters([...selectedFilters, filter]);
+    }
+  };
+
+  const filteredData = data
+    .filter((item) =>
+      item.verdict
+        ? item.verdict.toLowerCase().includes(searchTerm.toLowerCase())
+        : "safe".includes(searchTerm.toLowerCase())
+    )
+    .filter(
+      (item) =>
+        selectedFilters.length === 0 ||
+        selectedFilters.some((filter) => item.tags.includes(filter))
+    );
+
+  const totalPages = Math.ceil(filteredData.length / 10);
+  const currentData = filteredData.slice(
+    (currentPage - 1) * 10,
+    currentPage * 10
+  );
+  const maxPaginationButtons = 5;
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -112,6 +143,56 @@ export default function Requests() {
       </h1>
       <Statistics />
       <div className="mb-6" /> {/* Add some margin bottom */}
+      {/* Search and filter bar */}
+      <div className="flex flex-row justify-between items-center gap-4">
+        <div className="relative flex-grow">
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={handleSearch}
+            className="w-full pl-8 pr-4 py-2 dark:bg-gray-800 dark:text-gray-400 border-0 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <RiSearch2Line className="text-gray-400" />
+          </div>
+        </div>
+        <div className="flex items-center space-x-4">
+          <button
+            className="flex items-center px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md focus:outline-none"
+            onClick={handleFilterToggle}
+          >
+            <RiFilter3Line className="text-xl mr-1" />
+            Filters
+          </button>
+          {showFilters && (
+            <div className="flex space-x-2">
+              {/* Add your filter buttons here */}
+              <button
+                onClick={() => handleFilterSelection("Tag1")}
+                className={`px-2 py-1 rounded-md border border-gray-300 dark:border-gray-600 ${
+                  selectedFilters.includes("Tag1")
+                    ? "bg-blue-500 text-white dark:bg-blue-500 dark:text-gray-100"
+                    : "bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                }`}
+              >
+                Tag1
+              </button>
+              <button
+                onClick={() => handleFilterSelection("Tag2")}
+                className={`px-2 py-1 rounded-md border border-gray-300 dark:border-gray-600 ${
+                  selectedFilters.includes("Tag2")
+                    ? "bg-blue-500 text-white dark:bg-blue-500 dark:text-gray-100"
+                    : "bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                }`}
+              >
+                Tag2
+              </button>
+              {/* Add more filter buttons as needed */}
+            </div>
+          )}
+        </div>
+      </div>
       <table className="w-full">
         <thead>
           <tr>

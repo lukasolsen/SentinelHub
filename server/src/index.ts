@@ -1,25 +1,14 @@
 import express, { Express } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-
-dotenv.config();
+import mongoose from "mongoose";
+import "./config/db";
 
 const app: Express = express();
 app.use(express.json());
 app.use(cors());
 
 const port = process.env.PORT || 1200;
-/*
-app.post("/api/parse-email", emailParsing);
-
-app.post("/api/add-bad-email", addBadEmail);
-
-app.post("/api/bad-emails", getBadEmails);
-
-app.get("/api/bad-email/:id", getBadEmail);
-
-app.post("/api/related-reports", getRelatedReports);
-*/
 
 app.use(require("./routes"));
 

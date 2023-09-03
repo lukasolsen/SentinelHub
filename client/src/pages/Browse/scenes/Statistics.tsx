@@ -218,8 +218,8 @@ const Statistics = () => {
       </div>
       <div className="flex flex-row justify-evenly gap-4 dark:text-white text-bodyTextWhite">
         <div className="flex flex-col items-center bg-surface-light dark:bg-surface shadow-md border dark:border-gray-700 border-gray-300 p-4 rounded-lg w-3/12">
-          <h5 className="text-lg font-semibold mb-4">Last Scanned Emails</h5>
-          <div className="w-72 h-72">
+          <h5 className="text-lg font-semibold">Last Scanned Emails</h5>
+          <div className="w-72 h-60">
             <PieComponent data={data} />
           </div>
         </div>
@@ -229,7 +229,7 @@ const Statistics = () => {
           <h5 className="text-lg font-semibold mb-4">
             Last 3 Days Scanned Emails
           </h5>
-          <div className="w-full h-72">
+          <div className="w-full h-60">
             {" "}
             {/* Increased width */}
             <LineComponent data={data} />

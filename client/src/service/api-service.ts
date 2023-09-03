@@ -1,55 +1,53 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { getIPAddress } from "./util-service";
-
-type EmailContentRequest = {
-  emailContent: string;
-  ip_address: string;
-};
 
 type ErrorResponse = {
   error: string;
 };
 
-const makeGetRequest = async <T>(
-  api: string,
-  params?: Record<string, string>
-): Promise<T | ErrorResponse> => {
-  const ip_address = await getIPAddress();
-
-  const headers = {
-    "Content-Type": "application/json",
-  };
-
-  const queryParams = params ? { ...params, ip_address } : { ip_address };
-
-  try {
-    const response = await axios.get(api, {
-      headers,
-      params: queryParams,
-    });
-    return response.data as T;
-  } catch (error) {
-    return { error: error.message };
-  }
+const getBaseUrl = (): string => {
+  return "http://localhost:1200/api"; // Your base API URL
 };
 
-const makePostRequest = async <T>(
-  api: string,
-  requestData?: EmailContentRequest
-): Promise<T | ErrorResponse> => {
-  const ip_address = await getIPAddress();
+let globalIpAddress: string | null = null;
 
+const createRequestConfig = async (): Promise<AxiosRequestConfig> => {
   const headers = {
+    Accept: "*/*",
     "Content-Type": "application/json",
+    Authorization: "Bearer " + sessionStorage.getItem("token"),
   };
 
-  if (requestData) {
-    requestData.ip_address = ip_address;
+  if (!globalIpAddress) {
+    globalIpAddress = await getIPAddress();
   }
 
+  return {
+    headers,
+    params: { ip: globalIpAddress },
+  };
+};
+
+const makeRequest = async <T>(
+  method: "GET" | "POST",
+  url: string,
+  requestData?: Record<string, any>
+): Promise<T | ErrorResponse> => {
   try {
-    const response = await axios.post(api, requestData, { headers });
-    return response.data as T;
+    const token = sessionStorage.getItem("token") || "";
+    const requestConfig = await createRequestConfig();
+    const response = await axios.request<T>({
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+      url: getBaseUrl() + url,
+      ...requestConfig,
+      ...(method === "POST" ? { data: requestData } : { params: requestData }),
+    });
+    return response.data;
   } catch (error) {
     return { error: error.message };
   }
@@ -58,67 +56,96 @@ const makePostRequest = async <T>(
 export const sendEmailContent = async (
   emailContent: string
 ): Promise<ErrorResponse | VendorOutput> => {
-  const api = "http://localhost:1200/api/parse/email";
-
-  const queryParams = {
-    emailContent,
-  };
-
-  return makePostRequest<VendorOutput>(api, queryParams);
+  const api = "/parse/email";
+  const requestData = { emailContent };
+  return makeRequest<VendorOutput>("POST", api, requestData);
 };
 
 export const addEmailContent = async (
   emailContent: string
 ): Promise<ErrorResponse | VendorOutput> => {
-  const api = "http://localhost:1200/api/email/add-bad-email";
-
-  const queryParams = {
-    emailContent,
-  };
-
-  return makePostRequest<VendorOutput>(api, queryParams);
+  const api = "/email/add-bad-email";
+  const requestData = { emailContent };
+  return makeRequest<VendorOutput>("POST", api, requestData);
 };
 
 export const getEmails = async (): Promise<ErrorResponse | VendorOutput[]> => {
-  const api = "http://localhost:1200/api/email/bad-emails";
-
-  return makeGetRequest<VendorOutput[]>(api);
+  const api = "/email/bad-emails";
+  return makeRequest<VendorOutput[]>("GET", api);
 };
 
 export const getEmail = async (
   id: string
 ): Promise<ErrorResponse | IDataOutput> => {
-  const api = `http://localhost:1200/api/email/get/${id}`;
-
-  return makeGetRequest<IDataOutput>(api);
+  const api = `/email/get/${id}`;
+  return makeRequest<IDataOutput>("GET", api);
 };
 
 export const getRelatedReports = async (
   id: number
 ): Promise<ErrorResponse | VendorOutput[]> => {
-  const api = `http://localhost:1200/api/email/get/${id}/related-samples`;
-  //Make the things in body
-
-  return makeGetRequest<VendorOutput[]>(api);
+  const api = `/email/get/${id}/related-samples`;
+  return makeRequest<VendorOutput[]>("GET", api);
 };
 
 export const getVendors = async (
   id: number
 ): Promise<ErrorResponse | VendorOutput[]> => {
-  const api = `http://localhost:1200/api/email/get/${id}/vendors`;
-  return makeGetRequest<VendorOutput[]>(api);
+  const api = `/email/get/${id}/vendors`;
+  return makeRequest<VendorOutput[]>("GET", api);
 };
 
 export const getStrings = async (
   id: number
 ): Promise<ErrorResponse | VendorOutput[]> => {
-  const api = `http://localhost:1200/api/email/get/${id}/strings`;
-  return makeGetRequest<VendorOutput[]>(api);
+  const api = `/email/get/${id}/strings`;
+  return makeRequest<VendorOutput[]>("GET", api);
 };
 
 export const getStatistics = async (): Promise<
   ErrorResponse | VendorOutput[]
 > => {
-  const api = `http://localhost:1200/api/email/statistics`;
-  return makeGetRequest<VendorOutput[]>(api);
+  const api = "/email/statistics";
+  return makeRequest<VendorOutput[]>("GET", api);
+};
+
+export const register = async (
+  email: string
+): Promise<ErrorResponse | VendorOutput> => {
+  const api = "/user/register";
+  const requestData = { email, ip: globalIpAddress };
+  sessionStorage.setItem("isLoggedIn", "true");
+  return makeRequest<VendorOutput>("POST", api, requestData);
+};
+
+export const login = async (
+  email: string
+): Promise<ErrorResponse | VendorOutput> => {
+  const api = "/user/login";
+
+  const requestData = { email, ip: globalIpAddress };
+  sessionStorage.setItem("isLoggedIn", "true");
+  return makeRequest<VendorOutput>("POST", api, requestData);
+};
+
+export const checkLoggedIn = async (): Promise<
+  ErrorResponse | VendorOutput
+> => {
+  //check our session storage before we check the api
+  const token = sessionStorage.getItem("isLoggedIn");
+  if (token) {
+    return { status: "ok" };
+  }
+
+  const ip = await getIPAddress();
+  const api = `/user/check-login?ip=${ip}`;
+  return makeRequest<VendorOutput>("GET", api);
+};
+
+export const getUserInformation = async (): Promise<
+  ErrorResponse | VendorOutput
+> => {
+  const ip = await getIPAddress();
+  const api = "/user/me?ip=" + ip;
+  return makeRequest<VendorOutput>("GET", api);
 };
