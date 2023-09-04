@@ -1,103 +1,106 @@
-interface Attachment {
-  fileName: string;
-  contentType: string;
-  content: Buffer; // Replace with the appropriate type for attachment content
-}
+type FromType = {
+  value: {
+    address: string;
+    name: string;
+  };
+  html: string;
+  text: string;
+};
 
-interface EmailHeader {
+type HeaderLine = {
   key: string;
   line: string;
   value: string;
-}
+};
 
-interface EmailHeaders {
+type HeadersT = {
   html: string;
   messageId: string;
   subject: string;
   text: string;
   textAsHtml: string;
-}
+};
 
-interface EmailAddress {
-  address: string;
-  name: string;
-}
-
-interface EmailContact {
-  value: EmailAddress;
-  html: string;
-  text: string;
-}
-
-interface EmailData {
-  attachments: Attachment[];
+interface Data {
+  attachments: string[];
   date: string;
-  from: EmailContact;
-  to: EmailContact;
-  headerLines: EmailHeader[];
-  headers: EmailHeaders;
+  from: FromType;
+  headerLines: HeaderLine[];
+  headers: HeadersT;
   html: string;
   messageId: string;
   subject: string;
+  to: FromType;
 }
 
-interface EmailMetadata {
-  date: string;
-  from: string;
-  to?: string;
-  ip: string;
-  size: number;
-  subject: string;
-  md5: string;
-  sha256: string;
+interface IEmail {
+  reportId: number;
+  timestamp: string;
+  emailHash: string;
+  tags: string[];
+  data: Data;
+  metadata: {
+    date: string;
+    from: string;
+    to?: string;
+    ip: string;
+    size: number;
+    subject: string;
+    md5: string;
+    sha256: string;
+  };
+  strings: TStrings;
+  vendors: VendorOutput[];
+  verdict: string;
+  country: {
+    code: string;
+    name: string;
+  };
 }
 
-interface VendorData {
-  tags?: string[];
-}
-
-interface VendorCountry {
-  name: string;
-  code: number;
-}
-
-interface Vendor {
+interface VendorOutput {
   name: string;
   url: string;
   isThreat: boolean;
-  tags: string[];
   data?: VendorData;
-  country?: VendorCountry;
 }
 
-interface EmailReport {
-  data: EmailData;
-  emailHash: string;
-  metadata: EmailMetadata;
-  reportId: number;
-  tags: string[];
-  verdict: string;
-  timestamp: string;
-  vendors: Vendor[];
-  country: VendorCountry;
-}
+type VendorData = {
+  tags?: string[];
+};
 
-interface RelatedReports {
-  equalIPs: EmailReport[];
-  equalVerdicts: EmailReport[];
-}
+/*  STRINGS  */
 
-export {
-  Attachment,
-  EmailHeader,
-  EmailHeaders,
-  EmailAddress,
-  EmailContact,
-  EmailData,
-  EmailMetadata,
-  VendorData,
-  VendorCountry,
-  Vendor,
-  EmailReport,
-  RelatedReports,
+type TStringType = {
+  name: string;
+  display_name: string;
+  families: TStringFamily[];
+  color: string;
+};
+
+type TStringFamily = {
+  name: string;
+  display_name?: string;
+  color: string;
+};
+
+type TStringTag = {
+  name: string;
+  display_name: string;
+  color: string;
+};
+
+type StringType = {
+  string: string;
+  tags: TStringTag[];
+};
+
+type TStrings = {
+  familyTypes: TStringType[];
+  strings: {
+    name: string;
+    family: string;
+    familyType: string;
+    strings: StringType[];
+  }[];
 };

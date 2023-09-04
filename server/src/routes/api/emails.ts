@@ -2,85 +2,15 @@ import express from "express";
 import { Request, Response, NextFunction } from "express";
 import { generateHash, generateMD5, getEmailContent } from "../../utils/Util";
 import { ParsedMail } from "mailparser";
-import { Vendor } from "../../types/global";
 import { CheckIP } from "../../service/protection-service";
 import { extractStrings } from "../../utils/stringExtractor";
+import {
+  CreateReport,
+  FindReport,
+  ListReports,
+} from "../../service/report-service";
 const router = express.Router();
 
-type FromType = {
-  value: {
-    address: string;
-    name: string;
-  };
-  html: string;
-  text: string;
-};
-
-type HeaderLine = {
-  key: string;
-  line: string;
-  value: string;
-};
-
-type HeadersT = {
-  html: string;
-  messageId: string;
-  subject: string;
-  text: string;
-  textAsHtml: string;
-};
-
-interface Data {
-  attachments: string[];
-  date: string;
-  from: FromType;
-  headerLines: HeaderLine[];
-  headers: HeadersT;
-  html: string;
-  messageId: string;
-  subject: string;
-  to: FromType;
-}
-
-interface IEmail {
-  reportId: number;
-  timestamp: string;
-  emailHash: string;
-  tags: string[];
-  data: Data;
-  metadata: {
-    date: string;
-    from: string;
-    to?: string;
-    ip: string;
-    size: number;
-    subject: string;
-    md5: string;
-    sha256: string;
-  };
-  strings: TStrings;
-  vendors: VendorOutput[];
-  verdict: string;
-  country: {
-    code: string;
-    name: string;
-  };
-}
-
-interface VendorOutput {
-  name: string;
-  url: string;
-  isThreat: boolean;
-  data?: VendorData;
-}
-
-type VendorData = {
-  tags?: string[];
-};
-// Simulated data for bad emails
-const badEmails: IEmail[] = [];
-
-// Middleware to handle request parameters
 router.param("id", (req, res, next, id) => {
   req.body.id = id;
   next();
@@ -129,9 +59,10 @@ const sanitizeEmail = (email: IEmail, whitelist: string[] = []): IEmail => {
 router.get(
   "/get/:id",
 
-  function (req: Request, res: Response, next: NextFunction) {
+  async function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
-    const email = badEmails.find((item) => item.reportId === parseInt(id));
+
+    const email = await FindReport(id);
     const sanitizedEmail = sanitizeEmail(email);
     res.send(sanitizedEmail);
   }
@@ -141,10 +72,13 @@ router.get(
 router.get(
   "/get/:id/related-samples",
 
-  function (req: Request, res: Response, next: NextFunction) {
+  async function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
     const { offset } = req.query;
-    const email = badEmails.find((item) => item.reportId === parseInt(id));
+    const badEmails = await ListReports();
+    const email = await badEmails.find(
+      (item) => item.reportId === parseInt(id)
+    );
 
     if (email) {
       // Define pagination parameters
@@ -181,9 +115,9 @@ router.get(
 router.get(
   "/get/:id/vendors",
 
-  function (req: Request, res: Response, next: NextFunction) {
+  async function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
-    const email = badEmails.find((item) => item.reportId === parseInt(id));
+    const email = await FindReport(id);
 
     const sanitizedEmail = sanitizeEmail(email, ["vendors"]);
     res.send(sanitizedEmail?.vendors || []); // Return an empty array if vendors are not found
@@ -194,9 +128,9 @@ router.get(
 router.get(
   "/get/:id/strings",
 
-  function (req: Request, res: Response, next: NextFunction) {
+  async function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
-    const email = badEmails.find((item) => item.reportId === parseInt(id));
+    const email = await FindReport(id);
 
     const sanitizedEmail = sanitizeEmail(email, ["strings"]);
     res.send(sanitizedEmail?.strings || []); // Return an empty array if strings are not found
@@ -205,14 +139,14 @@ router.get(
 
 //TODO: Needs to be fixed for newer data
 router.get(
-  "/bad-emails",
+  "/get-all",
 
-  function (req: Request, res: Response, next: NextFunction) {
+  async function (req: Request, res: Response, next: NextFunction) {
     // remove the "to" field from the response
-    const emailsWithoutTo = badEmails.map(({ metadata, ...rest }) => ({
-      ...rest,
-      metadata: { ...metadata, to: undefined },
-    }));
+    const Emails = await ListReports();
+
+    const emailsWithoutTo = Emails.map((item) => sanitizeEmail(item));
+
     res.send(emailsWithoutTo);
   }
 );
@@ -221,10 +155,12 @@ router.get(
 router.get(
   "/statistics",
 
-  function (req: Request, res: Response, next: NextFunction) {
-    const totalEmails = badEmails.length;
-    const totalSafe = badEmails.filter((item) => item.isSafe).length;
-    const totalThreats = badEmails.filter((item) => !item.isSafe).length;
+  async function (req: Request, res: Response, next: NextFunction) {
+    const emails = await ListReports();
+
+    const totalEmails = emails.length;
+    const totalSafe = emails.filter((item) => item.isSafe).length;
+    const totalThreats = emails.filter((item) => !item.isSafe).length;
 
     // Get all the amount of safe emails, and threats number, from dates.
 
@@ -246,7 +182,7 @@ router.get(
             */
 
     //get all reports, but just get the date, and verdict
-    const lineChartData = badEmails.map((item) => ({
+    const lineChartData = emails.map((item) => ({
       date: item.metadata.date,
       verdict: item.verdict,
     }));
@@ -329,9 +265,7 @@ router.post(
     // Add the strings to the bad email entry
     newBadEmail.strings = strings;
 
-    console.log(newBadEmail);
-
-    badEmails.push(newBadEmail);
+    await CreateReport(newBadEmail);
     res.send({ status: "ok", id: newBadEmail.reportId });
   }
 );

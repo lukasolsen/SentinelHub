@@ -29,39 +29,6 @@ export const regexPatterns = {
   PHONE_NUMBER_STRICT:
     /(?<!\w)(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}(?!\w)/gim,
 };
-type TStringType = {
-  name: string;
-  display_name: string;
-  families: TStringFamily[];
-  color: string;
-};
-
-type TStringFamily = {
-  name: string;
-  display_name?: string;
-  color: string;
-};
-
-type TStringTag = {
-  name: string;
-  display_name: string;
-  color: string;
-};
-
-type StringType = {
-  string: string;
-  tags: TStringTag[];
-};
-
-type TStrings = {
-  familyTypes: TStringType[];
-  strings: {
-    name: string;
-    family: string;
-    familyType: string;
-    strings: StringType[];
-  }[];
-};
 
 const DEFAULT_FAMILY_TYPE = "common";
 const DEFAULT_FAMILY = "common";

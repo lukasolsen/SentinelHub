@@ -70,7 +70,7 @@ export const addEmailContent = async (
 };
 
 export const getEmails = async (): Promise<ErrorResponse | VendorOutput[]> => {
-  const api = "/email/bad-emails";
+  const api = "/email/get-all";
   return makeRequest<VendorOutput[]>("GET", api);
 };
 
