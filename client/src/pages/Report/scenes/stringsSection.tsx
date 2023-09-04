@@ -215,6 +215,9 @@ function StringsSection({ id }: { id: number }) {
       </div>
 
       {/* Display statistics (Sunbirst) */}
+      <h2 className="text-2xl font-bold mb-4 mt-8 dark:text-white text-bodyTextWhite">
+        Statistics
+      </h2>
       <div className="w-full h-96 flex items-center justify-center">
         <Sunbirst data={strings} />
       </div>

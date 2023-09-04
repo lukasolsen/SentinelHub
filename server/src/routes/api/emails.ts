@@ -159,8 +159,12 @@ router.get(
     const emails = await ListReports();
 
     const totalEmails = emails.length;
-    const totalSafe = emails.filter((item) => item.isSafe).length;
-    const totalThreats = emails.filter((item) => !item.isSafe).length;
+    const totalSafe = emails.filter(
+      (item) => item.verdict.toLowerCase() === "safe"
+    ).length;
+    const totalThreats = emails.filter(
+      (item) => item.verdict.toLowerCase() !== "safe"
+    ).length;
 
     // Get all the amount of safe emails, and threats number, from dates.
 

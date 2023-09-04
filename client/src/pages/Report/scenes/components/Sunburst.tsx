@@ -29,7 +29,7 @@ export default function Sunbirst({ data }) {
     });
 
     return {
-      name: familyType.name,
+      name: familyType.display_name,
       color: familyType.color,
       children,
     };
