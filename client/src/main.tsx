@@ -9,12 +9,17 @@ import Report from "./pages/Report/Report.tsx";
 import Browse from "./pages/Browse/Browse.tsx";
 import { TThemeProvider } from "./context/TThemeProvider.tsx";
 import NotFound from "./pages/UtilityPages/404.tsx";
-import Login from "./pages/Signups/Login.tsx";
+import { DDataProvider } from "./context/DataProvider.tsx";
+import Profile from "./pages/Profile/Profile.tsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
+  },
+  {
+    path: "/profile",
+    element: <Profile />,
   },
   {
     path: "/add-report",
@@ -73,11 +78,13 @@ export const MUITheme = () =>
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={MUITheme}>
-    <TThemeProvider>
-      <div className="dark:bg-background bg-slate-100 overscroll-auto h-full min-h-screen break-all">
-        <Navbar />
-        <RouterProvider router={router} />
-      </div>
-    </TThemeProvider>
+    <DDataProvider>
+      <TThemeProvider>
+        <div className="dark:bg-background bg-slate-100 overscroll-auto h-full min-h-screen break-all">
+          <Navbar />
+          <RouterProvider router={router} />
+        </div>
+      </TThemeProvider>
+    </DDataProvider>
   </ThemeProvider>
 );

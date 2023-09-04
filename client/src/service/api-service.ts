@@ -64,7 +64,7 @@ export const sendEmailContent = async (
 export const addEmailContent = async (
   emailContent: string
 ): Promise<ErrorResponse | VendorOutput> => {
-  const api = "/email/add-bad-email";
+  const api = "/email/scan";
   const requestData = { emailContent };
   return makeRequest<VendorOutput>("POST", api, requestData);
 };

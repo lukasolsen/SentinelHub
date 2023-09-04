@@ -332,8 +332,14 @@ export default function GeneticAnalysis({
                         </div>
                         <div className="w-2/12 text-base">
                           <span
-                            className={`${!data.isSafe && "text-red-600"} 
-                            ${data.isSafe && "text-green-500"}`}
+                            className={`${
+                              data.verdict.toLowerCase() !== "safe" &&
+                              "text-red-600"
+                            } 
+                            ${
+                              data.verdict.toLowerCase() === "safe" &&
+                              "text-green-500"
+                            }`}
                           >
                             {report.verdict}
                           </span>
@@ -341,11 +347,15 @@ export default function GeneticAnalysis({
                         <div className="w-2/12">
                           <span className="dark:text-gray-400 text-gray-600 text-base">
                             <span
-                              className={`${!data.isSafe && "text-red-600"} ${
-                                data.isSafe && "text-green-500"
+                              className={`${
+                                data.verdict.toLowerCase() !== "safe" &&
+                                "text-red-600"
+                              } ${
+                                data.verdict.toLowerCase() === "safe" &&
+                                "text-green-500"
                               }`}
                             >
-                              {data.totalVendorsThreats}
+                              {data.totalRelatedSamples}
                             </span>{" "}
                             / {data.totalVendors}
                           </span>

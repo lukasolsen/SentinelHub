@@ -22,7 +22,7 @@ const Detections = ({ id }: { id: number }) => {
           {data &&
             data
               .slice()
-              .sort((a, b) => (a.isThreat && !b.isThreat ? -1 : 1))
+              .sort((a, b) => (a.threat && !b.isThreat ? -1 : 1))
               .map(
                 (vendor, index) =>
                   index % 2 === 0 && (

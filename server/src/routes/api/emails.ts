@@ -30,10 +30,12 @@ router.param("verdict", (req, res, next, verdict) => {
 // Sanitize an email by deleting specific fields
 const sanitizeEmail = (email: IEmail, whitelist: string[] = []): IEmail => {
   if (email) {
+    //console.log("email ->", email);
     // Create a sanitized copy of the email
-    const sanitizedEmail: IEmail = { ...email };
+    const sanitizedEmail: IEmail = email;
 
     const fieldsToDelete = [
+      "_id",
       "strings",
       "vendors",
       "metadata.to",
@@ -47,7 +49,9 @@ const sanitizeEmail = (email: IEmail, whitelist: string[] = []): IEmail => {
 
     // Iterate through the fields to delete and remove them
     for (const field of fieldsToDelete) {
+      console.log("field ->", sanitizedEmail["data.to"]);
       if (!whitelist.includes(field)) delete sanitizedEmail[field];
+      console.log("sanitizedEmail ->", sanitizedEmail[field]);
     }
 
     return sanitizedEmail;
@@ -250,8 +254,9 @@ router.get(
   }
 );
 
+// ? Scans an email and returns the report ID
 router.post(
-  "/add-bad-email",
+  "/scan",
 
   async function (req: Request, res: Response, next: NextFunction) {
     const { emailContent } = req.body;
@@ -263,10 +268,9 @@ router.post(
     const ip = receivedSpfLine?.line.split("client-ip=")[1].split(";")[0] || "";
 
     const newBadEmail = await createBadEmailEntry(parsed, ip);
-    // Extract all possible strings
+
     const strings = extractStrings(emailContent);
-    console.log(strings);
-    // Add the strings to the bad email entry
+
     newBadEmail.strings = strings;
 
     await CreateReport(newBadEmail);
