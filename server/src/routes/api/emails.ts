@@ -9,6 +9,7 @@ import {
   FindReport,
   ListReports,
 } from "../../service/report-service";
+import { yaraScan } from "../../utils/yaraScanner";
 const router = express.Router();
 
 router.param("id", (req, res, next, id) => {
@@ -268,6 +269,9 @@ router.post(
     const ip = receivedSpfLine?.line.split("client-ip=")[1].split(";")[0] || "";
 
     const newBadEmail = await createBadEmailEntry(parsed, ip);
+    const scannedYara = await yaraScan(emailContent);
+
+    console.log("yaraScan ->", scannedYara);
 
     const strings = extractStrings(emailContent);
 
