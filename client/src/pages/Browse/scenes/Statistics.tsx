@@ -47,7 +47,7 @@ const PieComponent = ({ data }: { data: IStatistics }) => (
     arcLinkLabelsThickness={2}
     arcLinkLabelsColor={{ from: "color" }}
     arcLabelsSkipAngle={10}
-    colors={["#dc2626", "#16a34a"]}
+    colors={["#16a34a", "#dc2626"]}
     arcLabelsTextColor={{
       from: "color",
       modifiers: [["darker", 2]],
@@ -125,7 +125,7 @@ const LineComponent = ({ data /* see data tab */ }: { data: IStatistics }) => (
         <p>{formatDate(point.data.x)}</p>
       </div>
     )}
-    colors={["#dc2626", "#16a34a"]}
+    colors={["#16a34a", "#dc2626"]}
     yFormat=" >-.2f"
     axisTop={null}
     axisRight={null}
