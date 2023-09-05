@@ -1,8 +1,14 @@
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import Navbar from "./components/Navbar.tsx";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import Layout from "./components/Layout.tsx";
+import {
+  BrowserRouter,
+  Route,
+  RouterProvider,
+  Routes,
+  createBrowserRouter,
+} from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material";
 import AddReport from "./pages/AddReports/AddReport.tsx";
 import Report from "./pages/Report/Report.tsx";
@@ -11,37 +17,6 @@ import { TThemeProvider } from "./context/TThemeProvider.tsx";
 import NotFound from "./pages/UtilityPages/404.tsx";
 import { DDataProvider } from "./context/DataProvider.tsx";
 import Profile from "./pages/Profile/Profile.tsx";
-
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-  },
-  {
-    path: "/profile",
-    element: <Profile />,
-  },
-  {
-    path: "/add-report",
-    element: <AddReport />,
-  },
-  {
-    path: "/report",
-    element: <Report />,
-  },
-  {
-    path: "/report/:id",
-    element: <Report />,
-  },
-  {
-    path: "/browse",
-    element: <Browse />,
-  },
-  {
-    path: "*",
-    element: <NotFound />,
-  },
-]);
 
 export const MUITheme = () =>
   createTheme({
@@ -80,10 +55,19 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={MUITheme}>
     <DDataProvider>
       <TThemeProvider>
-        <div className="dark:bg-background bg-slate-100 overscroll-auto h-full min-h-screen break-all">
-          <Navbar />
-          <RouterProvider router={router} />
-        </div>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route index path="/" element={<App />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/:id" element={<Profile />} />
+              <Route path="/add-report" element={<AddReport />} />
+              <Route path="/report/:id" element={<Report />} />
+              <Route path="/browse" element={<Browse />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
       </TThemeProvider>
     </DDataProvider>
   </ThemeProvider>
