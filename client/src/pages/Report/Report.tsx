@@ -5,6 +5,7 @@ import GeneticAnalysis from "./scenes/geneticAnalysis";
 import Tab from "@mui/material/Tab";
 import { TabContext, TabList } from "@mui/lab";
 import DetectionScene from "./scenes/detectionScene";
+import Table from "../../components/Table";
 
 /*
 const ReportHeader = ({ vendors }: { vendors: IDataOutput }) => (
@@ -28,6 +29,21 @@ const Report = () => {
   const [relations, setRelations] = useState<Relations>();
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
+
+  const yaraDetectionData = [
+    {
+      id: 1,
+      date: "2023-09-15 14:30",
+      yaraRule: "Email Suspicion Rule",
+      description: "This rule detects suspicious email patterns.",
+      severity: "High",
+      flaggedContent: "Sample flagged content goes here...",
+      sender: "sender@example.com",
+      recipient: "recipient@example.com",
+      subject: "Suspicious Subject",
+    },
+    // Add more YARA detection entries as needed
+  ];
 
   useEffect(() => {
     setLoading(true);
@@ -114,6 +130,16 @@ const Report = () => {
                 }`}
                 onClick={() => setCurrentTab("details")}
               />
+              <Tab
+                label="YARA Detection"
+                value="yara"
+                className={`py-4 px-1 text-center border-b-2 font-medium text-sm focus:outline-none ${
+                  currentTab === "yara"
+                    ? "text-indigo-600 border-indigo-500 dark:text-indigo-300 dark:border-indigo-700"
+                    : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
+                }`}
+                onClick={() => setCurrentTab("yara")}
+              />
             </TabList>
           </TabContext>
 
@@ -148,6 +174,34 @@ const Report = () => {
                   {/* Add more details */}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* YARA Detection Tab */}
+          {currentTab === "yara" && (
+            <div className="mt-8">
+              <h2 className="text-xl font-bold mb-4 dark:text-white">
+                YARA Detection
+              </h2>
+              <Table
+                data={yaraDetectionData}
+                headers={[
+                  { name: "Date", dataKey: "date" },
+                  { name: "YARA Rule", dataKey: "yaraRule" },
+                  { name: "Description", dataKey: "description" },
+                  { name: "Severity", dataKey: "severity" },
+                  {
+                    name: "Flagged Content",
+                    cellRender: (item) => (
+                      <div className="max-w-xs truncate">
+                        {item.flaggedContent}
+                      </div>
+                    ),
+                  },
+                  // Add more headers as needed
+                ]}
+              />
+              {/* Additional information or actions can be added here */}
             </div>
           )}
         </div>

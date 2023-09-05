@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { TabContext, TabList } from "@mui/lab";
 import Tab from "@mui/material/Tab";
-import {
-  FaBug,
-  FaCheckCircle,
-  FaQuestion,
-  FaQuestionCircle,
-} from "react-icons/fa";
+import { FaBug, FaCheckCircle, FaQuestionCircle } from "react-icons/fa";
 import StringsSection from "./stringsSection";
+import Tooltip from "../../../components/Tooltip";
 
 export default function GeneticAnalysis({
   data,
@@ -284,19 +280,15 @@ export default function GeneticAnalysis({
                 <hr className="dark:border-gray-700" />
                 <h1 className="mb-2 mt-2 font-bold text-[1rem] flex flex-row items-center">
                   Relative Samples ({relations?.relatedSamples?.length})
-                  <FaQuestionCircle
-                    className="ml-2 text-blue-600 cursor-pointer"
-                    data-tooltip-target="relativeIPsTooltip"
-                    size={14}
+                  <Tooltip
+                    content="Shows relevant samples that are related to this sample."
+                    showDelay={300}
+                    hideDelay={200}
+                    children={
+                      <FaQuestionCircle className="ml-2 text-gray-500" />
+                    }
+                    width="w-44"
                   />
-                  <div
-                    id="relativeIPsTooltip"
-                    role="tooltip"
-                    className="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700"
-                  >
-                    Tooltip content
-                    <div className="tooltip-arrow" data-popper-arrow></div>
-                  </div>
                 </h1>
                 <hr className="dark:border-gray-700" />
 

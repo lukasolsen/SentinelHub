@@ -582,12 +582,20 @@ export default function Profile() {
 
   const [yaraRules, setYaraRules] = useState([
     {
-      name: "Malware Rule 1",
-      description: "This rule detects malware",
-      tags: ["malware", "trojan"],
+      name: "Win32_Backdoor_Minodo",
+      description: "Yara rule that detects Minodo backdoor.",
+      tags: ["backdoor", "minodo", "win32"],
       created: "2021-04-01",
-      createdBy: "Lukas",
+      createdBy: "ReversingLabs",
       enabled: true,
+    },
+    {
+      name: "Win32_Infostealer_MultigrainPOS",
+      description: "Yara rule that detects MultigrainPOS infostealer.",
+      tags: ["infostealer", "multigrainpos", "win32"],
+      created: "2023-04-01",
+      createdBy: "ReversingLabs",
+      enabled: false,
     },
     // Add more YARA rules as needed
   ]);
