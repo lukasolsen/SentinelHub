@@ -4,8 +4,8 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path"); // Import the 'path' module
 
-const EXE = path.join(__dirname, "yara", "yara64.exe"); // Use path.join to create the correct file path
-const RULE = path.join(__dirname, "yara", "rule.yar"); // Use path.join to create the correct file path
+const EXE = path.join(__dirname, "yara", "yara64.exe");
+const RULE = path.join(__dirname, "yara", "rule.yar");
 
 //output from the yara scan:
 /*
@@ -28,7 +28,9 @@ stdout: AsciiExample C:\Users\Bruker\AppData\Local\Temp\tempfile.txt
 0x43a9:$ascii_string: Creative
 */
 
-export const yaraScan = async (textToTest: string): outputYara => {
+export const yaraScan = async (
+  textToTest: string
+): Promise<EYaraRuleOutput> => {
   // Make a temp file
   const tempFileName = path.join(os.tmpdir(), "tempfile.txt"); // Use path.join to create the correct file path
 

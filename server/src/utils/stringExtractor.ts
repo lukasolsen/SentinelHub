@@ -167,7 +167,7 @@ export const extractStrings = (html: string): TStrings => {
       ?.families.find((family) => family.name === familyName);
   };
 
-  const strings: TStrings = {
+  const strings: EStrings = {
     familyTypes, // Define your familyTypes here
     strings: [
       {
