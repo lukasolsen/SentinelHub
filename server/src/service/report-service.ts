@@ -2,7 +2,7 @@ import Report, { IReport } from "../models/Report";
 import { Types } from "mongoose";
 
 // Create a new report
-const CreateReport = async (report: IReport): Promise<IReport> => {
+const CreateReport = async (report: EEmail): Promise<IReport> => {
   try {
     const newReport = new Report(report);
     const savedReport = await newReport.save();

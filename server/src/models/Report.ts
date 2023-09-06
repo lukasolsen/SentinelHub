@@ -3,29 +3,22 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IReport extends Document {
+  _id?: string; // Only for MongoDB
   reportId: number;
   timestamp: string;
   emailHash: string;
   tags: string[];
-  data: Data;
-  metadata: {
-    date: string;
-    from: string;
-    to?: string;
-    ip: string;
-    size: number;
-    subject: string;
-    md5: string;
-    sha256: string;
-  };
-  strings: TStrings;
-  vendors: VendorOutput[];
+  data: EEmailData;
+  metadata: EEmailMetadata;
+  strings: EStrings;
+  vendors: EVendorOutput[];
   verdict: string;
-  yara: outputYara;
-  country: {
-    code: string;
-    name: string;
-  };
+  isSafe: boolean;
+  totalVendorsSafe: number;
+  totalVendorsThreats: number;
+  totalVendors: number;
+  yara: EYaraRuleOutput[];
+  country: ECountry;
 }
 
 const userSchema: Schema = new Schema({

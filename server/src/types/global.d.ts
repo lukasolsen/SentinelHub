@@ -1,75 +1,72 @@
-type FromType = {
-  value: {
-    address: string;
-    name: string;
-  };
+// EMAIL DATA TYPES
+
+// Represents the 'from' or 'to' value in an email
+interface EEmailValue {
+  address: string;
+  name: string;
   html: string;
   text: string;
-};
+}
 
-type HeaderLine = {
+// Represents header lines in an email
+interface EHeaderLine {
   key: string;
   line: string;
-  value: string;
-};
+}
 
-type HeadersT = {
+// Represents email headers
+interface EEmailHeaders {
   html: string;
   messageId: string;
   subject: string;
   text: string;
   textAsHtml: string;
-};
+}
 
-interface Data {
+// Represents an email's data
+interface EEmailData {
   attachments: string[];
   date: string;
-  from: FromType;
-  headerLines: HeaderLine[];
-  headers: HeadersT;
+  from: EEmailValue;
+  headerLines: EHeaderLine[];
+  headers: EEmailHeaders;
   html: string;
   messageId: string;
   subject: string;
-  to: FromType;
+  to: EEmailValue;
 }
 
-interface IEmail {
-  reportId: number;
-  timestamp: string;
-  emailHash: string;
-  tags: string[];
-  data: Data;
-  metadata: {
-    date: string;
-    from: string;
-    to?: string;
-    ip: string;
-    size: number;
-    subject: string;
-    md5: string;
-    sha256: string;
-  };
-  strings: TStrings;
-  vendors: VendorOutput[];
-  verdict: string;
-  country: {
-    code: string;
-    name: string;
-  };
+// Represents email metadata
+interface EEmailMetadata {
+  date: string;
+  from: string;
+  to?: string;
+  ip: string;
+  subject: string;
+  md5: string;
+  sha256: string;
 }
 
-interface VendorOutput {
+// Represents vendor output data
+interface EVendorOutputData {
+  tags?: string[];
+}
+
+// Represents a complete vendor output
+interface EVendorOutput {
   name: string;
   url: string;
   isThreat: boolean;
-  data?: VendorData;
+  tags?: string[];
+  country?: {
+    code: number;
+    name: string;
+  };
+  data?: EVendorOutputData;
 }
 
-type VendorData = {
-  tags?: string[];
-};
-
-type outputYara = {
+// Represents Yara rule output
+interface EYaraRuleOutput {
   rule: string;
   found: boolean;
   meta: {
@@ -77,39 +74,72 @@ type outputYara = {
     author: string;
   };
   output: any;
-};
-/*  STRINGS  */
+}
 
-type TStringType = {
+// Represents a country
+interface ECountry {
+  code: number;
+  name: string;
+}
+
+// Represents an email
+interface EEmail {
+  _id?: string; // Only for MongoDB
+  reportId: number;
+  timestamp: string;
+  emailHash: string;
+  tags: string[];
+  data: EEmailData;
+  metadata: EEmailMetadata;
+  strings: EStrings;
+  vendors: EVendorOutput[];
+  verdict: string;
+  isSafe: boolean;
+  totalVendorsSafe: number;
+  totalVendorsThreats: number;
+  totalVendors: number;
+  yara: EYaraRuleOutput[];
+  country: ECountry;
+}
+
+// STRING TYPES
+
+// Represents a string type
+interface EStringType {
   name: string;
   display_name: string;
-  families: TStringFamily[];
+  families: EStringFamily[];
   color: string;
-};
+}
 
-type TStringFamily = {
+// Represents a string family
+interface EStringFamily {
   name: string;
   display_name?: string;
   color: string;
-};
+}
 
-type TStringTag = {
+// Represents a string tag
+interface EStringTag {
   name: string;
   display_name: string;
   color: string;
-};
+}
 
-type StringType = {
-  string: string;
-  tags: TStringTag[];
-};
+// Represents a string data
+interface EStringData {
+  tags: EStringTag[];
+}
 
-type TStrings = {
-  familyTypes: TStringType[];
-  strings: {
-    name: string;
-    family: string;
-    familyType: string;
-    strings: StringType[];
-  }[];
-};
+// Represents strings of a family type
+interface EFamilyTypeStrings {
+  name: string;
+  family: string;
+  familyType: string;
+  strings: EStringType[];
+}
+
+// Represents string data including family types and strings
+interface EStrings {
+  familyTypes: EFamilyTypeStrings[];
+}
