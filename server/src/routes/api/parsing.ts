@@ -1,8 +1,13 @@
-import { Request, Response } from "express";
-import express from "express";
+import { Request, Response, Router } from "express";
 import { getEmailContent } from "../../utils/Util";
-const router = express.Router();
 
+const router = Router();
+
+/**
+ * Parses the email content provided in the request body and sends the parsed content.
+ * @param req - Express Request object
+ * @param res - Express Response object
+ */
 const emailParsing = async (req: Request, res: Response) => {
   const { emailContent } = req.body;
 
@@ -14,6 +19,7 @@ const emailParsing = async (req: Request, res: Response) => {
   }
 };
 
+// Define the route for parsing email content
 router.post("/email", emailParsing);
 
-module.exports = router;
+export default router;

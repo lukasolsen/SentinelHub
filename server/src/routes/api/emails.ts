@@ -29,11 +29,10 @@ router.param("verdict", (req, res, next, verdict) => {
 
 // Remove fields from the response, based on whitelists
 // Sanitize an email by deleting specific fields
-const sanitizeEmail = (email: IEmail, whitelist: string[] = []): IEmail => {
+const sanitizeEmail = (email: EEmail, whitelist: string[] = []): EEmail => {
   if (email) {
-    //console.log("email ->", email);
     // Create a sanitized copy of the email
-    const sanitizedEmail: IEmail = email;
+    const sanitizedEmail: EEmail = { ...email };
 
     const fieldsToDelete = [
       "_id",
@@ -50,7 +49,9 @@ const sanitizeEmail = (email: IEmail, whitelist: string[] = []): IEmail => {
 
     // Iterate through the fields to delete and remove them
     for (const field of fieldsToDelete) {
-      if (!whitelist.includes(field)) delete sanitizedEmail[field];
+      if (!whitelist.includes(field)) {
+        delete (sanitizedEmail as any)[field]; // Use type assertion here
+      }
     }
 
     return sanitizedEmail;
@@ -77,7 +78,7 @@ router.get(
 
   async function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
-    const { offset } = req.query;
+    const { offset } = req.query as { offset: string };
     const badEmails = await ListReports();
     const email = await badEmails.find(
       (item) => item.reportId === parseInt(id)
@@ -155,10 +156,26 @@ router.get(
   }
 );
 
-//TODO: Implement a statistics endpoint
+interface ReportStats {
+  totalEmails: number;
+  totalSafe: number;
+  totalThreats: number;
+  pieChartData: {
+    id: string;
+    label: string;
+    value: number;
+    color: string;
+  }[];
+  lineChartData: {
+    id: string;
+    label: string;
+    color: string;
+    data: { x: string; y: number }[];
+  }[];
+}
+
 router.get(
   "/statistics",
-
   async function (req: Request, res: Response, next: NextFunction) {
     const emails = await ListReports();
 
@@ -170,33 +187,17 @@ router.get(
       (item) => item.verdict.toLowerCase() !== "safe"
     ).length;
 
-    // Get all the amount of safe emails, and threats number, from dates.
+    const lineChartData: { date: string; verdict: string }[] = emails.map(
+      (item) => ({
+        date: item.metadata.date,
+        verdict: item.verdict,
+      })
+    );
 
-    /* Data required for Pie Chart:
-              data={[
-                {
-                  id: "safe",
-                  label: "Safe",
-                  value: 2290,
-                  color: "hsl(120, 70%, 50%)", // Green color for safe files
-                },
-                {
-                  id: "threats",
-                  label: "Threats",
-                  value: 20111,
-                  color: "hsl(0, 70%, 50%)", // Red color for malicious files
-                },
-              ]}
-            */
+    const lineChartDataDict: {
+      [key: string]: { safe: number; threats: number };
+    } = {};
 
-    //get all reports, but just get the date, and verdict
-    const lineChartData = emails.map((item) => ({
-      date: item.metadata.date,
-      verdict: item.verdict,
-    }));
-
-    //Make a list with the date as the key, and the value as the amount of safe emails, and threats
-    const lineChartDataDict = {};
     lineChartData.forEach((item) => {
       if (lineChartDataDict[item.date]) {
         if (item.verdict === "safe") {
@@ -212,45 +213,51 @@ router.get(
       }
     });
 
-    res.send({
+    const pieChartData = [
+      {
+        id: "safe",
+        label: "Safe",
+        value: totalSafe,
+        color: "hsl(142, 79%, 36%)",
+      },
+      {
+        id: "threats",
+        label: "Threats",
+        value: totalThreats,
+        color: "#dc2626",
+      },
+    ];
+
+    const formattedLineChartData = [
+      {
+        id: "safe",
+        label: "Safe",
+        color: "hsl(142, 79%, 36%)",
+        data: Object.keys(lineChartDataDict).map((key) => ({
+          x: key,
+          y: lineChartDataDict[key].safe,
+        })),
+      },
+      {
+        id: "threats",
+        label: "Threats",
+        color: "#dc2626",
+        data: Object.keys(lineChartDataDict).map((key) => ({
+          x: key,
+          y: lineChartDataDict[key].threats,
+        })),
+      },
+    ];
+
+    const stats: ReportStats = {
       totalEmails,
       totalSafe,
       totalThreats,
-      pieChartData: [
-        {
-          id: "safe",
-          label: "Safe",
-          value: totalSafe,
-          color: "hsl(142, 79%, 36%)", // Green color for safe files
-        },
-        {
-          id: "threats",
-          label: "Threats",
-          value: totalThreats,
-          color: "#dc2626", // Red color for malicious files
-        },
-      ],
-      lineChartData: [
-        {
-          id: "safe",
-          label: "Safe",
-          color: "hsl(142, 79%, 36%)",
-          data: Object.keys(lineChartDataDict).map((key) => ({
-            x: key,
-            y: lineChartDataDict[key].safe,
-          })),
-        },
-        {
-          id: "threats",
-          label: "Threats",
-          color: "#dc2626",
-          data: Object.keys(lineChartDataDict).map((key) => ({
-            x: key,
-            y: lineChartDataDict[key].threats,
-          })),
-        },
-      ],
-    });
+      pieChartData,
+      lineChartData: formattedLineChartData,
+    };
+
+    res.send(stats);
   }
 );
 
@@ -259,11 +266,11 @@ router.post(
   "/scan",
 
   async function (req: Request, res: Response, next: NextFunction) {
-    const { emailContent } = req.body;
+    const { emailContent } = req.body as { emailContent: string };
     const parsed = await getEmailContent(emailContent);
 
     const receivedSpfLine = parsed.headerLines.find(
-      (item) => item.key === "received-spf"
+      (item: EHeaderLine) => item.key === "received-spf"
     );
     const ip = receivedSpfLine?.line.split("client-ip=")[1].split(";")[0] || "";
 
@@ -281,43 +288,40 @@ router.post(
     res.send({ status: "ok", id: newBadEmail.reportId });
   }
 );
-
 const createBadEmailEntry = async (
   parsed: ParsedMail,
   ip: string
-): Promise<Vendor> => {
+): Promise<EEmail> => {
   const data = await CheckIP(ip);
   const sha256 = generateHash(parsed.from.value[0].address);
 
-  return {
-    data: parsed,
+  const entry: EEmail = {
+    data: parsed as EEmailData,
     reportId: Math.floor(Math.random() * 1000000),
     timestamp: new Date().toString(),
     emailHash: sha256,
     tags: data.tags,
     metadata: {
-      size: data.size,
-      subject: parsed.subject,
-      date: parsed.date.toISOString(),
-      from: parsed.from.value[0].address,
+      subject: parsed.subject || "",
+      date: parsed.date?.toISOString() || new Date().toISOString(),
+      from: parsed.from?.value[0].address || "",
       ip: ip,
-      md5: generateMD5(parsed.from.value[0].address),
+      md5: generateMD5(parsed.from?.value[0].address || ""),
       sha256: sha256,
     },
     vendors: data.vendors,
     verdict: data.verdict,
-    isSafe: data.verdict.toLowerCase() === "safe" ? true : false,
-    totalVendorsSafe: data.vendors.filter((item) => item.isThreat === false)
-      .length,
-    totalVendorsThreats: data.vendors.filter((item) => item.isThreat === true)
-      .length,
+    isSafe: data.verdict.toLowerCase() === "safe",
+    totalVendorsSafe: data.vendors.filter((item) => !item.isThreat).length,
+    totalVendorsThreats: data.vendors.filter((item) => item.isThreat).length,
     totalVendors: data.vendors.length,
     country: {
       code: data.country.code,
       name: data.country.name,
     },
-    //families_seen: data.family_seen,
   };
+
+  return entry;
 };
 
 module.exports = router;

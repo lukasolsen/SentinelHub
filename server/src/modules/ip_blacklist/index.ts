@@ -120,7 +120,7 @@ export class FeodotrackerAbuseCH {
     return FeodotrackerAbuseCH.instance;
   }
 
-  async getData(ip: string): Promise<VendorOutput> {
+  async getData(ip: string): Promise<EVendorOutput> {
     if (this.data.length === 0) {
       const dataPromises = this.urls.map((url) => getData(url));
       const dataArray = await Promise.all(dataPromises);
@@ -228,7 +228,7 @@ export class AlienVault {
     return AlienVault.instance;
   }
 
-  async getData(ip: string): Promise<VendorOutput> {
+  async getData(ip: string): Promise<EVendorOutput> {
     if (this.data.length === 0) {
       const dataPromises = this.urls.map((url) =>
         getData(url + ip + "/general")
