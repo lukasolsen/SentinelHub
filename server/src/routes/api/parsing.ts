@@ -22,4 +22,4 @@ const emailParsing = async (req: Request, res: Response) => {
 // Define the route for parsing email content
 router.post("/email", emailParsing);
 
-export default router;
+module.exports = router;
