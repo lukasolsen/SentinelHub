@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { simpleParser } from "mailparser";
+import { ParsedMail, simpleParser } from "mailparser";
 
 export const generateHash = (email: string) => {
   const hash = crypto.createHash("sha256");
