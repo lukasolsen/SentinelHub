@@ -239,10 +239,7 @@ export default function Table(props: TableProps): React.ReactElement {
             <tr key={rowIndex}>
               {headers &&
                 headers.map((header, colIndex) => (
-                  <td
-                    key={colIndex}
-                    className={`py-0 px-6 ${rowIndex !== 0 && "py-3"}`}
-                  >
+                  <td key={colIndex} className={`py-2 pt-1 px-6`}>
                     <div className="flex items-center dark:text-white text-gray-950">
                       {header.cellRender
                         ? header.cellRender(d)
