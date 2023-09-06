@@ -13,7 +13,7 @@ Sentinel Hub is an email security tool designed to detect and report spam emails
 
 These instructions will help you set up and run Sentinel Hub on your local machine for development and testing purposes.
 
-### Prerequisites
+### Tech
 
 **Client**:
 
