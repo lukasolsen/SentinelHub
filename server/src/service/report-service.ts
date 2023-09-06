@@ -20,7 +20,8 @@ const FindReport = async (reportId: string): Promise<IReport | null> => {
     console.log(report);
     return report;
   } catch (error) {
-    throw new Error("Unable to find the report.");
+    console.log(error);
+    //throw new Error("Unable to find the report.");
   }
 };
 
@@ -28,7 +29,7 @@ const FindReport = async (reportId: string): Promise<IReport | null> => {
 const ListReports = async (): Promise<IReport[]> => {
   try {
     //each report has a list of
-    const reports = await Report.find({}).lean();
+    const reports = await Report.find().lean();
     return reports;
   } catch (error) {
     throw new Error("Unable to list reports.");

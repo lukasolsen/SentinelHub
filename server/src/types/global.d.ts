@@ -69,6 +69,15 @@ type VendorData = {
   tags?: string[];
 };
 
+type outputYara = {
+  rule: string;
+  found: boolean;
+  meta: {
+    description: string;
+    author: string;
+  };
+  output: any;
+};
 /*  STRINGS  */
 
 type TStringType = {

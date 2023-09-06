@@ -21,6 +21,7 @@ export interface IReport extends Document {
   strings: TStrings;
   vendors: VendorOutput[];
   verdict: string;
+  yara: outputYara;
   country: {
     code: string;
     name: string;
@@ -35,6 +36,7 @@ const userSchema: Schema = new Schema({
   data: { type: Object, required: true },
   metadata: { type: Object, required: true },
   strings: { type: Object, required: true },
+  yara: { type: Object, required: true },
   vendors: { type: Object, required: true },
   verdict: { type: String, required: true },
   country: { type: Object, required: true },

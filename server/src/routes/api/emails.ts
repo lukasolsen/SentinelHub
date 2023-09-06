@@ -50,9 +50,7 @@ const sanitizeEmail = (email: IEmail, whitelist: string[] = []): IEmail => {
 
     // Iterate through the fields to delete and remove them
     for (const field of fieldsToDelete) {
-      console.log("field ->", sanitizedEmail["data.to"]);
       if (!whitelist.includes(field)) delete sanitizedEmail[field];
-      console.log("sanitizedEmail ->", sanitizedEmail[field]);
     }
 
     return sanitizedEmail;
@@ -276,6 +274,7 @@ router.post(
     const strings = extractStrings(emailContent);
 
     newBadEmail.strings = strings;
+    newBadEmail.yara = scannedYara;
 
     await CreateReport(newBadEmail);
     res.send({ status: "ok", id: newBadEmail.reportId });
@@ -288,8 +287,6 @@ const createBadEmailEntry = async (
 ): Promise<Vendor> => {
   const data = await CheckIP(ip);
   const sha256 = generateHash(parsed.from.value[0].address);
-
-  console.log("data ->", data);
 
   return {
     data: parsed,
