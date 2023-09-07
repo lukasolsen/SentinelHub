@@ -8,8 +8,10 @@ import {
   CreateReport,
   FindReport,
   ListReports,
+  SearchReport,
 } from "../../service/report-service";
 import { yaraScan } from "../../utils/yaraScanner";
+import { IReport } from "../../models/Report";
 const router = express.Router();
 
 router.param("id", (req, res, next, id) => {
@@ -288,6 +290,66 @@ router.post(
     res.send({ status: "ok", id: newBadEmail.reportId });
   }
 );
+
+// ? Search for emails
+router.post(
+  "/search",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // Get the query string from the request body
+      const { queryString } = req.body;
+
+      // Split the query string into individual search criteria
+      const criteria = queryString.split(" AND "); // You can use a different separator if needed
+
+      // Define a base MongoDB query
+      const baseQuery: any = {};
+
+      // Define mapping for keywords to MongoDB fields
+      const keywordMap: Record<string, string> = {
+        email: "data.from.value.address",
+        verdict: "verdict",
+        ip: "metadata.ip",
+        country: "country.name",
+        date: "metadata.date",
+        tag: "tags",
+      };
+
+      // Iterate through the criteria and build the MongoDB query
+      criteria.forEach((criterion) => {
+        const [keyword, value] = criterion.split(":");
+        const field = keywordMap[keyword];
+
+        if (field && value) {
+          if (field === "tags") {
+            baseQuery[field] = { $in: [value] };
+          } else {
+            baseQuery[field] = value;
+          }
+        }
+      });
+
+      // If no specific field provided, search by emailHash
+      if (Object.keys(baseQuery).length === 0) {
+        const emailHashQuery = {
+          emailHash: queryString,
+        };
+        const emailHashResults: IReport[] = await SearchReport(emailHashQuery);
+        res.json(emailHashResults);
+        return;
+      }
+
+      // Execute the MongoDB query
+      const results: IReport[] = await SearchReport(baseQuery);
+
+      res.json(results);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
 const createBadEmailEntry = async (
   parsed: ParsedMail,
   ip: string

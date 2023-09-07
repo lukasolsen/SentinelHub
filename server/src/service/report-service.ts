@@ -61,4 +61,20 @@ const DeleteReport = async (reportId: string): Promise<boolean> => {
   }
 };
 
-export { CreateReport, FindReport, ListReports, UpdateReport, DeleteReport };
+const SearchReport = async (query: object): Promise<IReport[]> => {
+  try {
+    const report = await Report.find(query).lean().select("-_id -__v -data.headers.delivered-to -data.headers.received -data.headers.x-google-smtp-source -data.headers.x-received -data.headers.arc-seal -data.headers.arc-message-signature -data.headers.arc-authentication-results -data.headerLines");
+    return report;
+  } catch (error) {
+    throw new Error("Unable to find the report.");
+  }
+};
+
+export {
+  CreateReport,
+  FindReport,
+  ListReports,
+  UpdateReport,
+  DeleteReport,
+  SearchReport,
+};
