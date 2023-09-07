@@ -1,50 +1,12 @@
-import { useEffect, useState } from "react";
-import { getEmails } from "../../service/api-service";
-import Statistics from "./scenes/Statistics";
-import Table from "../../components/Table";
-import { useNavigate } from "react-router-dom";
-import { FaCheck, FaExclamationTriangle } from "react-icons/fa";
-import { useData } from "../../context/DataContext";
+import Table from "../../../components/Table";
 
-export default function Requests() {
-  const { state, dispatch } = useData();
-  const [data, setData] = useState<IDataOutput[]>([]);
-  const navigate = useNavigate();
-  const getData = async () => {
-    try {
-      const emails: IDataOutput[] | { error: string } = await getEmails();
-      if ("error" in emails) {
-        console.error("Error fetching data:", emails.error);
-      } else {
-        setData(emails);
-        dispatch({ type: "SET_LOADING", payload: false });
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  useEffect(() => {
-    dispatch({ type: "SET_LOADING", payload: true });
-    getData();
-  }, []);
-
-  const headers = [
-    {
-      name: "Verdict",
-      dataKey: "verdict",
-    },
-    { name: "Response", dataKey: "response" },
-    { name: "Tags", dataKey: "tags" },
-    { name: "Date", dataKey: "date" },
-  ];
-
+// ! Broken code..
+export default function Search({ data }) {
   return (
     <div className="w-11/12 mx-auto">
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
         Public Requests
       </h1>
-      {!state.isLoading && <Statistics />}
       <div className="mb-6" /> {/* Add some margin bottom */}
       <Table
         data={data}

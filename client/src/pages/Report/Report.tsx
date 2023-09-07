@@ -6,6 +6,8 @@ import Tab from "@mui/material/Tab";
 import { TabContext, TabList } from "@mui/lab";
 import DetectionScene from "./scenes/detectionScene";
 import Table from "../../components/Table";
+import { useData } from "../../context/DataContext";
+import { ReportLoader } from "../../components/Loading";
 
 /*
 const ReportHeader = ({ vendors }: { vendors: IDataOutput }) => (
@@ -23,11 +25,11 @@ const ReportHeader = ({ vendors }: { vendors: IDataOutput }) => (
 );*/
 
 const Report = () => {
+  const { state, dispatch } = useData();
   const [currentTab, setCurrentTab] = useState("geneticAnalysis");
 
   const [data, setData] = useState<IDataOutput>();
   const [relations, setRelations] = useState<Relations>();
-  const [loading, setLoading] = useState(true);
   const { id } = useParams();
 
   const yaraDetectionData = [
@@ -46,12 +48,19 @@ const Report = () => {
   ];
 
   useEffect(() => {
-    setLoading(true);
+    dispatch({ type: "SET_LOADING", payload: true });
+    console.log(state.isLoading);
     if (!id) return;
-    getEmail(id).then((data: IDataOutput) => {
-      if (!data.error) setLoading(false);
-      setData(data);
-      setLoading(false);
+    getEmail(id).then((data: IDataOutput | { error: string }) => {
+      if ("error" in data) {
+        dispatch({ type: "SET_LOADING", payload: false });
+        console.log(state.isLoading);
+      } else {
+        setData(data as IDataOutput);
+
+        dispatch({ type: "SET_LOADING", payload: false });
+        console.log(state.isLoading);
+      }
     });
   }, [id]);
 
@@ -65,7 +74,7 @@ const Report = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {!loading && data && (
+      {!state.isLoading && data && (
         <div>
           <div
             className={`
@@ -189,13 +198,21 @@ const Report = () => {
                   { name: "Date", dataKey: "date" },
                   { name: "YARA Rule", dataKey: "yaraRule" },
                   { name: "Description", dataKey: "description" },
-                  { name: "Severity", dataKey: "severity" },
                   {
-                    name: "Flagged Content",
-                    cellRender: (item) => (
-                      <div className="max-w-xs truncate">
-                        {item.flaggedContent}
-                      </div>
+                    name: "Severity",
+                    cellRender: (item: { severity: string }) => (
+                      <span className="text-red-500">{item.severity}</span>
+                    ),
+                  },
+                  {
+                    name: "View more",
+                    cellRender: () => (
+                      <a
+                        className="text-blue-500 underline"
+                        href="/yara-detection"
+                      >
+                        <button>View more</button>
+                      </a>
                     ),
                   },
                   // Add more headers as needed
@@ -207,41 +224,9 @@ const Report = () => {
         </div>
       )}
 
-      {loading && (
-        <div className="flex flex-col items-center justify-center">
-          <h1 className="text-2xl font-bold dark:text-white">Loading...</h1>
-          <p className="dark:text-gray-400 mb-4">
-            Looks like this report is still being processed.
-          </p>
-          <h2 className="text-xl font-bold mb-4 dark:text-white">
-            <div
-              className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] text-primary motion-reduce:animate-[spin_1.5s_linear_infinite]"
-              role="status"
-            >
-              <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-                Loading...
-              </span>
-            </div>
-          </h2>
+      {state.isLoading && <ReportLoader />}
 
-          <div className="flex flex-row">
-            <a
-              className="bg-card hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded mr-2 h-36 w-36 shadow-sm cursor-pointer"
-              href="/"
-            >
-              Back to Home
-            </a>
-            <a
-              className="bg-card hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded mr-2 h-36 w-36 shadow-sm cursor-pointer"
-              href="/browse"
-            >
-              Browse Reports
-            </a>
-          </div>
-        </div>
-      )}
-
-      {!data && !loading && (
+      {!data && !state.isLoading && (
         <div className="flex flex-col items-center justify-center">
           <h1 className="text-2xl font-bold dark:text-white">Not Found</h1>
           <p className="dark:text-gray-400 mb-4">

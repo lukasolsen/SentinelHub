@@ -128,6 +128,15 @@ export const login = async (
   return makeRequest<VendorOutput>("POST", api, requestData);
 };
 
+export const searchReports = async (
+  query: string
+): Promise<ErrorResponse | VendorOutput> => {
+  const api = "/email/search";
+
+  const requestData = { queryString: query, ip: globalIpAddress };
+  return makeRequest<VendorOutput>("POST", api, requestData);
+};
+
 export const checkLoggedIn = async (): Promise<
   ErrorResponse | VendorOutput
 > => {

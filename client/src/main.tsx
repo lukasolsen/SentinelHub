@@ -2,20 +2,14 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import Layout from "./components/Layout.tsx";
-import {
-  BrowserRouter,
-  Route,
-  RouterProvider,
-  Routes,
-  createBrowserRouter,
-} from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material";
 import AddReport from "./pages/AddReports/AddReport.tsx";
 import Report from "./pages/Report/Report.tsx";
 import Browse from "./pages/Browse/Browse.tsx";
 import { TThemeProvider } from "./context/TThemeProvider.tsx";
 import NotFound from "./pages/UtilityPages/404.tsx";
-import { DDataProvider } from "./context/DataProvider.tsx";
+import { DataProvider } from "./context/DataContext.tsx";
 import Profile from "./pages/Profile/Profile.tsx";
 
 export const MUITheme = () =>
@@ -53,7 +47,7 @@ export const MUITheme = () =>
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={MUITheme}>
-    <DDataProvider>
+    <DataProvider>
       <TThemeProvider>
         <BrowserRouter>
           <Routes>
@@ -69,6 +63,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           </Routes>
         </BrowserRouter>
       </TThemeProvider>
-    </DDataProvider>
+    </DataProvider>
   </ThemeProvider>
 );
