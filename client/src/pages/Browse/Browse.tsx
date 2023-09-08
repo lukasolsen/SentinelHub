@@ -11,8 +11,10 @@ export default function Requests() {
   const [data, setData] = useState<IDataOutput[]>([]);
   const navigate = useNavigate();
   const getData = async () => {
-    try {
-      const emails: IDataOutput[] | { error: string } = await getEmails();
+    try { 
+      const emails: IDataOutput[] | { error: string } = await getEmails(
+        state?.user?.token
+      );
       if ("error" in emails) {
         console.error("Error fetching data:", emails.error);
       } else {

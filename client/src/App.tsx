@@ -1,54 +1,30 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { checkLoggedIn, login, register } from "./service/api-service";
+import { useData } from "./context/DataContext";
 
 function App() {
-  const [email, setEmail] = useState("");
-  const [hasAccount, setHasAccount] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const getData = async () => {
-      const f = await checkLoggedIn();
-      return f;
-    };
-    getData().then((f) => {
-      if (f.status === "ok") {
-        sessionStorage.setItem("isLoggedIn", true);
-        setIsLoggedIn(true);
-        setHasAccount(true);
-      } else {
-        sessionStorage.clear();
-        setIsLoggedIn(false);
-        setHasAccount(false);
-      }
-      console.log(f);
-    });
-  }, []);
-
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
-    console.log("Submitted");
-
-    if (hasAccount) {
-      login(email).then((f) => {
-        sessionStorage.setItem("isLoggedIn", "true");
-        console.log(f);
-        setIsLoggedIn(true);
-      });
-    } else {
-      // create account
-      register(email).then((f) => {
-        console.log(f);
-        setIsLoggedIn(true);
-        sessionStorage.setItem("isLoggedIn", "true");
-      });
-    }
-  };
+  const { state } = useData();
 
   return (
     <div className="text-bodyTextWhite dark:text-white flex flex-col justify-center overflow-x-hidden p-4">
       <div className="container mx-auto">
+        {!state.user && (
+          <div
+            className="bg-white border rounded-md shadow-lg dark:bg-gray-800 dark:border-gray-700 mb-16"
+            role="alert"
+          >
+            <div className="flex items-center p-4 justify-center">
+              <p className="ml-3 text-red-600 dark:text-red-500 text-lg">
+                Looks like you're not logged in. Contact us at{" "}
+                <a
+                  href="mailto:lukmarwil@gmail.com"
+                  className="underline text-blue-500"
+                >
+                  lukmarwil@gmail.com
+                </a>
+              </p>
+            </div>
+          </div>
+        )}
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="md:w-2/5">
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-center mb-4 md:text-left text-balance">
@@ -64,38 +40,20 @@ function App() {
               the digital landscape securely. Our comprehensive suite of tools
               and expert insights ensures your online presence is protected.
             </p>
-
-            {!isLoggedIn && (
-              <div className="mb-4 flex flex-col gap-2">
-                <input
-                  className="bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-800 px-4 py-2 rounded w-full"
-                  onChange={(e) => setEmail(e.target.value)}
-                  type="email"
-                  value={email}
-                  placeholder="Email Address"
-                />
-                <button
-                  className="bg-blue-500 hover:bg-blue-700 dark:text-white font-semibold py-2 px-6 rounded mb-6 md:mb-0 md:mr-4 w-full"
-                  type="submit"
-                  onClick={handleSubmit}
-                >
-                  Login
-                </button>
-                <hr className="border-gray-300 dark:border-gray-700 my-6 md:hidden" />
+            {state.user && (
+              <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
+                <Link to="/add-report">
+                  <button className="bg-blue-500 hover:bg-blue-700 dark:text-white font-semibold py-2 px-6 rounded">
+                    Report Suspicious Emails
+                  </button>
+                </Link>
+                <Link to="/browse">
+                  <button className="bg-blue-500 hover:bg-blue-700 dark:text-white font-semibold py-2 px-6 rounded">
+                    Explore Threat Database
+                  </button>
+                </Link>
               </div>
             )}
-            <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-              <Link to="/add-report">
-                <button className="bg-blue-500 hover:bg-blue-700 dark:text-white font-semibold py-2 px-6 rounded">
-                  Report Suspicious Emails
-                </button>
-              </Link>
-              <Link to="/browse">
-                <button className="bg-blue-500 hover:bg-blue-700 dark:text-white font-semibold py-2 px-6 rounded">
-                  Explore Threat Database
-                </button>
-              </Link>
-            </div>
           </div>
           <div className="w-full md:w-3/5 flex justify-center md:justify-end">
             <img

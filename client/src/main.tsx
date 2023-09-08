@@ -2,14 +2,14 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import Layout from "./components/Layout.tsx";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material";
 import AddReport from "./pages/AddReports/AddReport.tsx";
 import Report from "./pages/Report/Report.tsx";
 import Browse from "./pages/Browse/Browse.tsx";
 import { TThemeProvider } from "./context/TThemeProvider.tsx";
 import NotFound from "./pages/UtilityPages/404.tsx";
-import { DataProvider } from "./context/DataContext.tsx";
+import { DataProvider, useData } from "./context/DataContext.tsx";
 import Profile from "./pages/Profile/Profile.tsx";
 import Search from "./pages/Browse/sub-pages/Search.tsx";
 
@@ -45,6 +45,16 @@ export const MUITheme = () =>
       },
     },
   });
+const ProtectedRoute = ({ element }: { element: React.ReactNode }) => {
+  const { state } = useData();
+  const isAuthenticated = !!state.user;
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{element}</>; // Render the protected route
+};
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={MUITheme}>
@@ -53,13 +63,32 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <BrowserRouter>
           <Routes>
             <Route element={<Layout />}>
-              <Route index path="/" element={<App />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/profile/:id" element={<Profile />} />
-              <Route path="/add-report" element={<AddReport />} />
-              <Route path="/report/:id" element={<Report />} />
-              <Route path="/browse" element={<Browse />} />
-              <Route path="/search" element={<Search />} />
+              <Route index element={<App />} />
+              <Route
+                path="/profile"
+                element={<ProtectedRoute element={<Profile />} />}
+              />
+              <Route
+                path="/profile/:id"
+                element={<ProtectedRoute element={<Profile />} />}
+              />
+              <Route
+                path="/add-report"
+                element={<ProtectedRoute element={<AddReport />} />}
+              />
+
+              <Route
+                path="/browse"
+                element={<ProtectedRoute element={<Browse />} />}
+              />
+              <Route
+                path="/search"
+                element={<ProtectedRoute element={<Search />} />}
+              />
+              <Route
+                path="/report/:id"
+                element={<ProtectedRoute element={<Report />} />}
+              />
 
               <Route path="*" element={<NotFound />} />
             </Route>

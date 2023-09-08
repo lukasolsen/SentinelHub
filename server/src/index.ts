@@ -1,15 +1,31 @@
 import express, { Express } from "express";
 import cors from "cors";
 import "./config/db";
+import connectMongo from "connect-mongo";
+//import session from "express-session";
+//import { MONGO_URI } from "./config";
+
+import helmet from "helmet";
 
 // Create an Express application
 const app: Express = express();
 
+app.use(cors());
+
 // Parse incoming JSON requests
 app.use(express.json());
 
-// Enable Cross-Origin Resource Sharing (CORS)
-app.use(cors());
+//const MongoStore = connectMongo;
+/*app.use(
+  session({
+    secret: "secret",
+    resave: false,
+    saveUninitialized: true,
+    store: new MongoStore({
+      mongoUrl: MONGO_URI,
+    }),
+  })
+);*/
 
 // Define the port where the server will listen
 const port = process.env.PORT || 1200;

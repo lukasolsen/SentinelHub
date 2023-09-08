@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { getStrings } from "../../../service/api-service";
 import Sunbirst from "./components/Sunburst";
+import { useData } from "../../../context/DataContext";
 
 type TStringType = {
   name: string;
@@ -33,12 +34,13 @@ type TStrings = {
 };
 
 function StringsSection({ id }: { id: number }) {
+  const { state } = useData();
   const [strings, setStrings] = useState<TStrings | null>(null);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [searchFilter, setSearchFilter] = useState<string>("");
 
   useEffect(() => {
-    getStrings(id).then((data) => {
+    getStrings(id, state?.user?.token).then((data) => {
       console.log(data);
       setStrings(data);
     });

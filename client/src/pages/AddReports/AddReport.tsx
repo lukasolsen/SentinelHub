@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { addEmailContent, sendEmailContent } from "../../service/api-service";
+import { useData } from "../../context/DataContext";
 
 export default function AddReport() {
+  const { state } = useData();
   const [page, setPage] = useState(1);
   const [emailContent, setEmailContent] = useState("");
   const [data, setData] = useState<Data>();
@@ -10,7 +12,10 @@ export default function AddReport() {
 
   const submitContent = async () => {
     type response = { content: Data };
-    const data: response = await sendEmailContent(emailContent);
+    const data: response = await sendEmailContent(
+      emailContent,
+      state?.user?.token
+    );
     setData(data.content);
     setPage(2);
   };
@@ -18,7 +23,7 @@ export default function AddReport() {
   const publishContent = async () => {
     if (!data) return console.log("No data");
 
-    const dat = await addEmailContent(emailContent);
+    const dat = await addEmailContent(emailContent, state?.user?.token);
     setId(dat.id);
 
     setPage(3);

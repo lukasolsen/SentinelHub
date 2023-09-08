@@ -49,20 +49,22 @@ export default function Search() {
 
   React.useEffect(() => {
     dispatch({ type: "SET_LOADING", payload: true });
-    searchReports(queryParameters.get("query")).then((res) => {
-      console.log(res);
-      if (res.error || res.length === 0) {
-        setError(true);
+    searchReports(queryParameters.get("query"), state?.user?.token).then(
+      (res) => {
+        console.log(res);
+        if (res.error || res.length === 0) {
+          setError(true);
+          dispatch({ type: "SET_LOADING", payload: false });
+          return;
+        }
+        if (res.length === 1) {
+          navigate(`/report/${res[0].reportId}`);
+          return;
+        }
+        setData(res);
         dispatch({ type: "SET_LOADING", payload: false });
-        return;
       }
-      if (res.length === 1) {
-        navigate(`/report/${res[0].reportId}`);
-        return;
-      }
-      setData(res);
-      dispatch({ type: "SET_LOADING", payload: false });
-    });
+    );
   }, []);
 
   const headers = [

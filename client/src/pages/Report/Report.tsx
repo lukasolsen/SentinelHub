@@ -51,22 +51,24 @@ const Report = () => {
     dispatch({ type: "SET_LOADING", payload: true });
     console.log(state.isLoading);
     if (!id) return;
-    getEmail(id).then((data: IDataOutput | { error: string }) => {
-      if ("error" in data) {
-        dispatch({ type: "SET_LOADING", payload: false });
-        console.log(state.isLoading);
-      } else {
-        setData(data as IDataOutput);
+    getEmail(id, state?.user?.token).then(
+      (data: IDataOutput | { error: string }) => {
+        if ("error" in data) {
+          dispatch({ type: "SET_LOADING", payload: false });
+          console.log(state.isLoading);
+        } else {
+          setData(data as IDataOutput);
 
-        dispatch({ type: "SET_LOADING", payload: false });
-        console.log(state.isLoading);
+          dispatch({ type: "SET_LOADING", payload: false });
+          console.log(state.isLoading);
+        }
       }
-    });
+    );
   }, [id]);
 
   useEffect(() => {
     if (!data) return;
-    getRelatedReports(data?.reportId).then((data) => {
+    getRelatedReports(data?.reportId, state?.user?.token).then((data) => {
       setRelations(data);
       console.log(data);
     });

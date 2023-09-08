@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { FaCheck, FaExclamationTriangle } from "react-icons/fa";
 import { getVendors } from "../../../service/api-service";
+import { useData } from "../../../context/DataContext";
 
 const Detections = ({ id }: { id: number }) => {
+  const { state } = useData();
   const [data, setData] = useState();
 
   useEffect(() => {
-    getVendors(id).then((data) => {
+    getVendors(id, state?.user?.token).then((data) => {
       console.log(data);
       setData(data);
     });

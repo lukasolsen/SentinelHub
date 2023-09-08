@@ -5,22 +5,44 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
+import { getUserInformation } from "../service/api-service";
+
+interface IUser {
+  _id: string;
+  ip: string;
+  email: string;
+  verified: boolean;
+  loggedIn: boolean;
+  role: string;
+  token: string;
+}
 
 // Define the initial state and actions
 type State = {
   searchTerm: string;
   isLoading: boolean;
+  user: IUser;
   // Add more data properties as needed
 };
 
 type Action =
   | { type: "SET_SEARCH_TERM"; payload: string }
-  | { type: "SET_LOADING"; payload: boolean };
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_USER"; payload: IUser }
+  | { type: "SET_USER_LOGGED_IN"; payload: boolean };
 // Add more action types as needed
 
 const initialState: State = {
   searchTerm: "",
   isLoading: false,
+  user: {
+    ip: "",
+    email: "",
+    verified: false,
+    loggedIn: false,
+    role: "member",
+    token: "",
+  },
   // Initialize other data properties here
 };
 
@@ -39,6 +61,8 @@ const dataReducer = (state: State, action: Action): State => {
       return { ...state, searchTerm: action.payload };
     case "SET_LOADING":
       return { ...state, isLoading: action.payload };
+    case "SET_USER":
+      return { ...state, user: action.payload };
     default:
       return state;
   }
@@ -49,6 +73,19 @@ type DataProviderProps = { children: ReactNode };
 
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(dataReducer, initialState);
+
+  useEffect(() => {
+    // Get the user here.
+
+    const getUser = async () => {
+      getUserInformation().then((res) => {
+        console.log(res);
+        dispatch({ type: "SET_USER", payload: res.user });
+      });
+    };
+
+    getUser();
+  }, []);
 
   return (
     <DataContext.Provider value={{ state, dispatch }}>

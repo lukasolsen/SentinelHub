@@ -1,11 +1,6 @@
 import { FaBell, FaDatabase, FaMoon, FaSearch, FaSun } from "react-icons/fa";
 import { useTheme } from "../context/TThemeProvider";
-import { useEffect, useState } from "react";
-import {
-  checkLoggedIn,
-  getUserInformation,
-  searchReports,
-} from "../service/api-service";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useData } from "../context/DataContext";
 
@@ -31,22 +26,7 @@ function ThemeSwitcher() {
 export default function Navbar() {
   const { state, dispatch } = useData();
   const navigate = useNavigate();
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [user, setUser] = useState({} as any);
   const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    checkLoggedIn().then((res) => {
-      if (res) {
-        setLoggedIn(true);
-
-        getUserInformation().then((res) => {
-          setUser(res.user);
-          //setLoading(false);
-        });
-      }
-    });
-  }, []);
 
   const Search = async (e: SubmitEvent) => {
     e.preventDefault();
@@ -71,7 +51,7 @@ export default function Navbar() {
             <input
               type="text"
               placeholder="Search"
-              value={searchQuery || state.searchQuery || ""}
+              value={searchQuery || state.searchTerm || ""}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="p-2 border-0 bg-transparent focus:border-0 focus:outline-none w-64 text-bodyTextWhite dark:text-white rounded-sm w-full"
             />
@@ -111,9 +91,9 @@ export default function Navbar() {
 
             <ThemeSwitcher />
 
-            {loggedIn && (
+            {state?.user?.ip && (
               <div className="flex items-center">
-                <a href={`/profile/${user?._id}`}>
+                <a href={`/profile/${state?.user?._id}`}>
                   <img
                     src="https://via.placeholder.com/50"
                     alt="profile"

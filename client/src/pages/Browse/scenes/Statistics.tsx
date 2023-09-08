@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getStatistics } from "../../../service/api-service";
 import { ResponsivePie } from "@nivo/pie";
 import { ResponsiveLine } from "@nivo/line";
+import { useData } from "../../../context/DataContext";
 
 interface IStatistics {
   totalThreats: number;
@@ -181,10 +182,11 @@ const LineComponent = ({ data /* see data tab */ }: { data: IStatistics }) => (
 );
 
 const Statistics = () => {
+  const { state } = useData();
   const [data, setData] = useState<IStatistics>();
 
   useEffect(() => {
-    getStatistics().then((data: IStatistics) => {
+    getStatistics(state?.user?.token).then((data: IStatistics) => {
       console.log(data);
       setData(data);
     });

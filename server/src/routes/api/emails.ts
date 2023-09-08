@@ -12,6 +12,7 @@ import {
 } from "../../service/report-service";
 import { yaraScan } from "../../utils/yaraScanner";
 import { IReport } from "../../models/Report";
+import { VerifyUser } from "../../service/user-service";
 const router = express.Router();
 
 router.param("id", (req, res, next, id) => {
@@ -61,13 +62,24 @@ const sanitizeEmail = (email: EEmail, whitelist: string[] = []): EEmail => {
   return email; // Return the original email if it's null or undefined
 };
 
+//make middleware to check the token sent in the request.
+const checkToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void | object> => {
+  const { token } = req.query as { token: string };
+  if (!VerifyUser(token))
+    return res.status(401).send({ message: "No permissions", status: "error" });
+  next();
+};
+
 // ? Get bad email by ID
 router.get(
   "/get/:id",
-
+  checkToken,
   async function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
-
     const email = await FindReport(id);
     const sanitizedEmail = sanitizeEmail(email);
     res.send(sanitizedEmail);
@@ -77,7 +89,7 @@ router.get(
 // ? Get related samples by ID with pagination
 router.get(
   "/get/:id/related-samples",
-
+  checkToken,
   async function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
     const { offset } = req.query as { offset: string };
@@ -85,8 +97,6 @@ router.get(
     const email = await badEmails.find(
       (item) => item.reportId === parseInt(id)
     );
-    //aq
-
     if (email) {
       // Define pagination parameters
       const startIndex = offset ? parseInt(offset) : 0;
@@ -121,7 +131,7 @@ router.get(
 // ? Get vendors from report
 router.get(
   "/get/:id/vendors",
-
+  checkToken,
   async function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
     const email = await FindReport(id);
@@ -134,7 +144,7 @@ router.get(
 // ? Get strings from id
 router.get(
   "/get/:id/strings",
-
+  checkToken,
   async function (req: Request, res: Response, next: NextFunction) {
     const { id } = req.body;
     const email = await FindReport(id);
@@ -147,7 +157,7 @@ router.get(
 //TODO: Needs to be fixed for newer data
 router.get(
   "/get-all",
-
+  checkToken,
   async function (req: Request, res: Response, next: NextFunction) {
     // remove the "to" field from the response
     const Emails = await ListReports();
@@ -178,6 +188,7 @@ interface ReportStats {
 
 router.get(
   "/statistics",
+  checkToken,
   async function (req: Request, res: Response, next: NextFunction) {
     const emails = await ListReports();
 
@@ -266,7 +277,7 @@ router.get(
 // ? Scans an email and returns the report ID
 router.post(
   "/scan",
-
+  checkToken,
   async function (req: Request, res: Response, next: NextFunction) {
     const { emailContent } = req.body as { emailContent: string };
     const parsed = await getEmailContent(emailContent);
@@ -294,6 +305,7 @@ router.post(
 // ? Search for emails
 router.post(
   "/search",
+  checkToken,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Get the query string from the request body
