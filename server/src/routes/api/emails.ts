@@ -299,6 +299,11 @@ router.post(
       // Get the query string from the request body
       const { queryString } = req.body;
 
+      if (!queryString) {
+        res.status(400).json({ error: "Missing query string" });
+        return;
+      }
+
       // Split the query string into individual search criteria
       const criteria = queryString.split(" AND "); // You can use a different separator if needed
 

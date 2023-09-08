@@ -11,6 +11,7 @@ import { TThemeProvider } from "./context/TThemeProvider.tsx";
 import NotFound from "./pages/UtilityPages/404.tsx";
 import { DataProvider } from "./context/DataContext.tsx";
 import Profile from "./pages/Profile/Profile.tsx";
+import Search from "./pages/Browse/sub-pages/Search.tsx";
 
 export const MUITheme = () =>
   createTheme({
@@ -58,6 +59,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               <Route path="/add-report" element={<AddReport />} />
               <Route path="/report/:id" element={<Report />} />
               <Route path="/browse" element={<Browse />} />
+              <Route path="/search" element={<Search />} />
+
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

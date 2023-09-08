@@ -6,6 +6,8 @@ import {
   getUserInformation,
   searchReports,
 } from "../service/api-service";
+import { useNavigate } from "react-router-dom";
+import { useData } from "../context/DataContext";
 
 function ThemeSwitcher() {
   const { theme, toggleTheme } = useTheme();
@@ -27,6 +29,8 @@ function ThemeSwitcher() {
 }
 
 export default function Navbar() {
+  const { state, dispatch } = useData();
+  const navigate = useNavigate();
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState({} as any);
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,9 +51,8 @@ export default function Navbar() {
   const Search = async (e: SubmitEvent) => {
     e.preventDefault();
 
-    searchReports(searchQuery).then((res) => {
-      console.log(res);
-    });
+    dispatch({ type: "SET_SEARCH_TERM", payload: searchQuery });
+    navigate("/search?query=" + searchQuery);
   };
 
   return (
@@ -68,7 +71,7 @@ export default function Navbar() {
             <input
               type="text"
               placeholder="Search"
-              value={searchQuery}
+              value={searchQuery || state.searchQuery || ""}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="p-2 border-0 bg-transparent focus:border-0 focus:outline-none w-64 text-bodyTextWhite dark:text-white rounded-sm w-full"
             />
