@@ -288,14 +288,9 @@ router.post(
     const ip = receivedSpfLine?.line.split("client-ip=")[1].split(";")[0] || "";
 
     const newBadEmail = await createBadEmailEntry(parsed, ip);
-    const scannedYara = await yaraScan(emailContent);
 
-    console.log("yaraScan ->", scannedYara);
-
-    const strings = extractStrings(emailContent);
-
-    newBadEmail.strings = strings;
-    newBadEmail.yara = scannedYara;
+    newBadEmail.strings = extractStrings(emailContent);
+    newBadEmail.yara = await yaraScan(emailContent);
 
     await CreateReport(newBadEmail);
     res.send({ status: "ok", id: newBadEmail.reportId });

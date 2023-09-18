@@ -2,7 +2,7 @@
  * Blacklist IP Module
  */
 
-import { getData } from "../../service/fetcher-service";
+import { getData } from "../../service/util-service";
 
 // make response type
 type FeodotrackerAbuseCHResp = {

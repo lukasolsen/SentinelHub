@@ -30,7 +30,7 @@ stdout: AsciiExample C:\Users\Bruker\AppData\Local\Temp\tempfile.txt
 
 export const yaraScan = async (
   textToTest: string
-): Promise<EYaraRuleOutput> => {
+): Promise<EYaraRuleOutput[]> => {
   // Make a temp file
   const tempFileName = path.join(os.tmpdir(), "tempfile.txt"); // Use path.join to create the correct file path
 

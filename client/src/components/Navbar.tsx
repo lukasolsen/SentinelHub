@@ -53,6 +53,11 @@ export default function Navbar() {
               placeholder="Search"
               value={searchQuery || state.searchTerm || ""}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  Search(e);
+                }
+              }}
               className="p-2 border-0 bg-transparent focus:border-0 focus:outline-none w-64 text-bodyTextWhite dark:text-white rounded-sm w-full"
             />
             <div>
